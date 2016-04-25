@@ -1,0 +1,167 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import socket, struct
+from optparse import OptionParser
+import signal 
+import sys
+import time
+
+def handler(signum, frame):
+    if mode == "read":
+        send_all_data(client, struct.pack("i", 0) )
+        client.close()
+
+def receive_data(client, datatype):
+    try:
+        msg= client.recv(struct.calcsize(datatype))
+        if len(msg) == 0: 
+           client.close()
+           sys.exit(1)
+    except:
+       client.close()
+       sys.exit(1)
+    
+    return struct.unpack(datatype, msg)[0]
+
+def send_all_data(client, msg):
+    totalsent = 0
+    while totalsent < len(msg):
+        sent= client.send(msg[totalsent:])
+        if sent == 0:
+            raise RuntimeError
+        totalsent = totalsent + sent
+
+def show(client, lines= False, counters= False):
+
+    send_all_data(client, struct.pack("i", 8) )
+
+    n_dev= receive_data(client, "i")
+
+    for dev in xrange(n_dev):
+        dev_name=  client.recv( receive_data(client, "i") )
+        dev_freq=  receive_data(client, "i")
+        dev_lines= receive_data(client, "i")
+       
+        print "Dev: %s - Freq: %d Hz - Lines: %d" % (dev_name, dev_freq, dev_lines)
+ 
+        is_pdu= bool(receive_data(client, "i"))
+        if not is_pdu:
+            comp_name= client.recv( receive_data(client, "i") )
+            print " - Computer: %s" % (comp_name)
+
+        if lines:
+            print "  * Lines:"
+        for lin in xrange(dev_lines):
+            lin_number = receive_data(client, "i")
+            lin_name   = client.recv( receive_data(client, "i") )
+            lin_voltage= receive_data(client, "f")
+            lin_desc   = client.recv( receive_data(client, "i") )
+
+            if lines:
+                print "    - Line: %2d - Name: %3s - Voltage: %.2f V - Desc: %s" % (lin_number, lin_name, lin_voltage, lin_desc), 
+
+            if is_pdu:
+                comp_name=   client.recv( receive_data(client, "i") )
+                if lines:
+                    print " - Computer: %s" % (comp_name)
+            else:
+                if lines:
+                    print
+
+        dev_counters= receive_data(client, "i")
+        if dev_counters and counters:
+            print "  * Counters:"
+        for con in xrange(dev_counters):
+            counter_id   = receive_data(client, "i")
+            counter_add  = client.recv( receive_data(client, "i") )
+            counter_lines= receive_data(client, "i")
+            counter_lines_array= []
+
+            for lin in xrange(counter_lines):
+                counter_lines_array.append( str(receive_data(client, "i")) )
+
+            if counters:
+                print "    - Counter: %2d - Address: %s - Selected lines: %s" % (counter_id, counter_add, ":".join(counter_lines_array))
+
+        print
+
+    client.close()
+
+def readdevice(client, dev_name, frequency):
+
+    send_all_data(client, struct.pack("i", 9) )
+
+    msg=  struct.pack("i", len(dev_name))
+    msg+= dev_name
+    msg+= struct.pack("i", frequency)
+    send_all_data(client, msg )
+
+    status= receive_data(client, "i")
+
+    if status == -1:
+        print "Device %s does not exist!" % (dev_name)
+
+    elif status == -2:
+        frequency= receive_data(client, "i")
+        print "Device %s only works at least %d Hz!" % (dev_name, frequency)
+ 
+    elif status == 0:
+        while True:
+            lines= receive_data(client, "i")
+            lines_array= []
+
+            sum_= 0
+            sample= ""
+            for lin in xrange(lines):
+                line_power= receive_data(client, "d")
+                sum_+= line_power
+                sample+= "%5.2f : " % (line_power)
+                lines_array.append( "%.2f" % (line_power) )
+
+            print "%s - %s =  %2.2f" % (time.strftime("%H:%M:%S", time.localtime()), sample[:-2], sum_)
+            send_all_data(client, struct.pack("i", 1) )
+
+if __name__ == "__main__":
+
+    # Parsear línea de comandos
+    parser = OptionParser("usage: %prog -s|--server SERVER:PORT\n"
+                          "       %prog -l|--lines\n"
+                          "       %prog -c|--counters\n"
+                          "       %prog -r|--read DEVNAME [-f|--freq FREQ]")
+    parser.add_option("-s", "--server", action = "store", type="string", dest = "server") 
+    parser.add_option("-l", "--lines",     action = "store_const", const = 0, dest = "lines")
+    parser.add_option("-c", "--counters",  action = "store_const", const = 1, dest = "counters") 
+    parser.add_option("-r", "--read",action = "store", type="string", dest = "device") 
+    parser.add_option("-f", "--freq",action = "store", type="int", dest = "freq", default= 0) 
+
+    (options, args) = parser.parse_args()
+
+    if not options.server or len(options.server.split(":")) != 2:
+        print "You must specify a pm_server SERVER:PORT!"
+        parser.print_help()
+        sys.exit(-1)
+
+    lines= False
+    counters= False
+    if options.lines == 0: 
+        lines= True
+    if options.counters == 1:
+        counters= True
+
+    global mode, client
+
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((options.server.split(":")[0], int(options.server.split(":")[1])))
+
+    if options.device:
+        mode= "read"
+        signal.signal(signal.SIGINT, handler)
+        readdevice(client, options.device, options.freq)
+    else:
+        mode= "show"
+        show(client, lines, counters)
+
+    client.close()
+
+

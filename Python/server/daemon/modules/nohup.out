@@ -1,0 +1,13 @@
+
+Starting devices...
+Starting device LMG450-0...       [32m[  OK  ]
+[0mStarting device LMG450-1...       [32m[  OK  ]
+[0mStarting device LMG450-2...       [32m[  OK  ]
+[0mStarting server...                [32m[  OK  ]
+[0mServer listening at ('0.0.0.0', 6526)
+Stopping devices...
+Stopping device LMG450-0...       [32m[  OK  ]
+[0mStopping device LMG450-1...       [32m[  OK  ]
+[0mStopping device LMG450-2...       [32m[  OK  ]
+[0mStopping server...                [32m[  OK  ]
+[0m

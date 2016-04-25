@@ -1,0 +1,206 @@
+#======================================================================
+# PowerMeter daemon settings
+#======================================================================
+
+from daemon.devices import *
+from daemon.modules import *
+
+#----------------------------------------------------------------------
+# General section
+#----------------------------------------------------------------------
+
+# IP and Port in which the daemon will be listening (default: 6526)
+
+IP="0.0.0.0"
+PORT=6526
+
+# Log file name (default: "/var/log/powermeter.log")
+LOGFILENAME="log/powermeter.log"
+
+#----------------------------------------------------------------------
+# Computers section
+#----------------------------------------------------------------------
+
+watts1= Computer(name="wats1", ip="0.0.0.0")
+watts2= Computer(name="wats2", ip="0.0.0.0")
+watts3= Computer(name="wats3", ip="0.0.0.0")
+watts4= Computer(name="wats4", ip="0.0.0.0")
+atom  = Computer(name="atom",  ip="0.0.0.0")
+watts_sandy = Computer(name="wats-sandy", ip="0.0.0.0")
+watts_ivy  = Computer(name="wats-ivy",  ip="0.0.0.0")
+watts_ivy2 = Computer(name="wats-ivy2", ip="0.0.0.0")
+
+tintorrum = Computer(name="tintorrum.act.uji.es", ip="0.0.0.0")
+compute_s870  = Computer(name="Compute s870",  ip="0.0.0.0") 
+compute_s2050 = Computer(name="Compute s2050", ip="0.0.0.0")
+compute_s1070 = Computer(name="Compute s1070", ip="0.0.0.0")
+
+tesla_s870 = Computer(name="Tesla S870", ip="0.0.0.0")
+tesla_s2050 = Computer(name="Tesla S2050", ip="0.0.0.0")
+tesla_s1070 = Computer(name="Tesla S1070", ip="0.0.0.0")
+peco_nas = Computer(name="Peco/NAS", ip="0.0.0.0")
+
+sw_ib= Computer(name="Switch infiniband tintorrum", ip="0.0.0.0")
+sw_ethernet= Computer(name="Switch ethernet tintorrum", ip="0.0.0.0")
+sw_ethernet_uji = Computer(name="Switch ethernet UJI", ip="0.0.0.0")
+sw_ethernet_hp = Computer(name="Switch ethernet 10/100/1000 HP", ip="0.0.0.0")
+
+compute_1  = [ Computer(name="compute-1-%d" % i , ip="0.0.0.0")  for i in xrange(9) ]
+compute_0_0 = Computer(name="compute-0-0,3",   ip="0.0.0.0")
+compute_0_4 = Computer(name="compute-0-4,7",   ip="0.0.0.0")
+compute_0_8 = Computer(name="compute-0-8,11",  ip="0.0.0.0")
+compute_0_12 = Computer(name="compute-0-12,15", ip="0.0.0.0")
+
+carma1 = Computer(name="carma1", ip="0.0.0.0")
+
+#----------------------------------------------------------------------
+# Devices section
+#----------------------------------------------------------------------
+
+"""
+dc2meter_1= DC2Device(name= "DC2Meter1", computer= watts1, url= "file://dev/ttyUSB0", max_frequency= 1000)
+dc2meter_1.add_line(number=0,  name="1",  voltage=0, description="Line 1")
+dc2meter_1.add_line(number=1,  name="2",  voltage=0, description="Line 2")
+dc2meter_1.add_line(number=2,  name="3",  voltage=0, description="Line 3")
+dc2meter_1.add_line(number=3,  name="4",  voltage=0, description="Line 4")
+dc2meter_1.add_line(number=4,  name="5",  voltage=0, description="Line 5")
+dc2meter_1.add_line(number=5,  name="6",  voltage=0, description="Line 6")
+dc2meter_1.add_line(number=6,  name="7",  voltage=0, description="Line 7")
+dc2meter_1.add_line(number=7,  name="8",  voltage=0, description="Line 8")
+dc2meter_1.add_line(number=8,  name="9",  voltage=12, description="Line 9")
+dc2meter_1.add_line(number=9,  name="10",  voltage=12, description="Line 10")
+dc2meter_1.add_line(number=10,  name="11",  voltage=0, description="Line 11")
+dc2meter_1.add_line(number=11,  name="12",  voltage=0, description="Line 12")
+dc2meter_1.add_line(number=12,  name="13",  voltage=0, description="Line 13")
+dc2meter_1.add_line(number=13,  name="14",  voltage=0, description="Line 14")
+dc2meter_1.add_line(number=14,  name="15",  voltage=0, description="Line 15")
+dc2meter_1.add_line(number=15,  name="16",  voltage=0, description="Line 16")
+dc2meter_1.add_line(number=16,  name="17",  voltage=3.3, description="Line 17")
+dc2meter_1.add_line(number=17,  name="18",  voltage=3.3, description="Line 18")
+dc2meter_1.add_line(number=18,  name="19",  voltage=3.3, description="Line 19")
+dc2meter_1.add_line(number=19,  name="20",  voltage=3.3, description="Line 20")
+dc2meter_1.add_line(number=20,  name="21",  voltage=5, description="Line 21")
+dc2meter_1.add_line(number=21,  name="22",  voltage=5, description="Line 22")
+dc2meter_1.add_line(number=22,  name="23",  voltage=5, description="Line 23")
+dc2meter_1.add_line(number=23,  name="24",  voltage=5, description="Line 24")
+dc2meter_1.add_line(number=24,  name="25",  voltage=0, description="Line 25")
+
+
+
+
+dcmeter_1= DCDevice(name= "DCMeter1", computer= watts3, url= "file://dev/ttyUSB2", max_frequency= 28)
+dcmeter_1.add_line(number=0,  name="1",  voltage=12, description="Line 1")
+dcmeter_1.add_line(number=1,  name="2",  voltage=12, description="Line 2")
+dcmeter_1.add_line(number=2,  name="3",  voltage=12, description="Line 3")
+dcmeter_1.add_line(number=3,  name="4",  voltage=12, description="Line 4")
+dcmeter_1.add_line(number=4,  name="5",  voltage=12, description="Line 5")
+dcmeter_1.add_line(number=5,  name="6",  voltage=12, description="Line 6")
+dcmeter_1.add_line(number=6,  name="7",  voltage=12, description="Line 7")
+dcmeter_1.add_line(number=7,  name="8",  voltage=12, description="Line 8")
+dcmeter_1.add_line(number=8,  name="9",  voltage=12, description="Line 9")
+dcmeter_1.add_line(number=9,  name="10", voltage=12, description="Line 10")
+dcmeter_1.add_line(number=10, name="11", voltage=12, description="Line 11")
+dcmeter_1.add_line(number=11, name="12", voltage=12, description="Line 12")
+
+dcmeter_2= DCDevice(name= "DCMeter2", computer= watts1, url= "file://dev/ttyUSB3", max_frequency= 28)
+dcmeter_2.add_line(number=0,  name="1",  voltage=12, description="Line 1")
+dcmeter_2.add_line(number=1,  name="2",  voltage=12, description="Line 2")
+dcmeter_2.add_line(number=2,  name="3",  voltage=12, description="Line 3")
+dcmeter_2.add_line(number=3,  name="4",  voltage=12, description="Line 4")
+dcmeter_2.add_line(number=4,  name="5",  voltage=12, description="Line 5")
+dcmeter_2.add_line(number=5,  name="6",  voltage=12, description="Line 6")
+dcmeter_2.add_line(number=6,  name="7",  voltage=12, description="Line 7")
+dcmeter_2.add_line(number=7,  name="8",  voltage=12, description="Line 8")
+dcmeter_2.add_line(number=8,  name="9",  voltage=12, description="Line 9")
+dcmeter_2.add_line(number=9,  name="10", voltage=12, description="Line 10")
+dcmeter_2.add_line(number=10, name="11", voltage=12, description="Line 11")
+dcmeter_2.add_line(number=11, name="12", voltage=12, description="Line 12")
+
+
+"""
+
+
+
+#wattsup_1= WattsUpDevice(name="WattsUp2", computer=watts2, url="file://dev/ttyUSB0", max_frequency=1)
+"""
+wattsup_2= WattsUpDevice(name="WattsUp1", computer=carma1, url="file://dev/ttyUSB0", max_frequency=1)
+
+pdu_0=PDUDevice(name="PDU0", url="ssh://apc:apc@apc.act.uji.es", max_frequency=1)
+pdu_0.add_line(number=0,  name="Outlet %d" % 1,  computer=tintorrum,  voltage=220, description="Outlet %d" % 1)
+pdu_0.add_line(number=1,  name="Outlet %d" % 2,  computer=compute_1[0], voltage=220, description="Outlet %d" % 2)
+pdu_0.add_line(number=2,  name="Outlet %d" % 3,  computer=compute_1[1], voltage=220, description="Outlet %d" % 3)
+pdu_0.add_line(number=3,  name="Outlet %d" % 4,  computer=compute_1[2], voltage=220, description="Outlet %d" % 4)
+pdu_0.add_line(number=4,  name="Outlet %d" % 5,  computer=compute_1[3], voltage=220, description="Outlet %d" % 5)
+pdu_0.add_line(number=5,  name="Outlet %d" % 6,  computer=None,       voltage=220, description="Outlet %d" % 6)
+pdu_0.add_line(number=6,  name="Outlet %d" % 7,  computer=None,       voltage=220, description="Outlet %d" % 7)
+pdu_0.add_line(number=7,  name="Outlet %d" % 8,  computer=None,       voltage=220, description="Outlet %d" % 8)
+pdu_0.add_line(number=8,  name="Outlet %d" % 9,  computer=None,       voltage=220, description="Outlet %d" % 9)
+pdu_0.add_line(number=9,  name="Outlet %d" % 10, computer=None,       voltage=220, description="Outlet %d" % 10)
+pdu_0.add_line(number=10, name="Outlet %d" % 11, computer=None,       voltage=220, description="Outlet %d" % 11)
+pdu_0.add_line(number=11, name="Outlet %d" % 12, computer=sw_ib,      voltage=220, description="Outlet %d" % 12)
+pdu_0.add_line(number=12, name="Outlet %d" % 13, computer=sw_ethernet,voltage=220, description="Outlet %d" % 13)
+pdu_0.add_line(number=13, name="Outlet %d" % 14, computer=None,       voltage=220, description="Outlet %d" % 14)
+pdu_0.add_line(number=14, name="Outlet %d" % 15, computer=None,       voltage=220, description="Outlet %d" % 15)
+pdu_0.add_line(number=15, name="Outlet %d" % 16, computer=None,       voltage=220, description="Outlet %d" % 16)
+pdu_0.add_line(number=16, name="Outlet %d" % 17, computer=compute_1[4], voltage=220, description="Outlet %d" % 17)
+pdu_0.add_line(number=17, name="Outlet %d" % 18, computer=compute_1[5], voltage=220, description="Outlet %d" % 18)
+pdu_0.add_line(number=18, name="Outlet %d" % 19, computer=compute_1[6], voltage=220, description="Outlet %d" % 19)
+pdu_0.add_line(number=19, name="Outlet %d" % 20, computer=compute_1[7], voltage=220, description="Outlet %d" % 20)
+pdu_0.add_line(number=20, name="Outlet %d" % 21, computer=compute_1[8], voltage=220, description="Outlet %d" % 21)
+pdu_0.add_line(number=21, name="Outlet %d" % 22, computer=None,       voltage=220, description="Outlet %d" % 22)
+pdu_0.add_line(number=22, name="Outlet %d" % 23, computer=None,       voltage=220, description="Outlet %d" % 23)
+pdu_0.add_line(number=23, name="Outlet %d" % 24, computer=None,       voltage=220, description="Outlet %d" % 24)
+
+
+pdu_1=PDUDevice(name="PDU1", url="ssh://apc:apc@apc1.act.uji.es", max_frequency=1)
+pdu_1.add_line(number=0,  name="Outlet %d" % 1,  computer=compute_s870,    voltage=220, description="Outlet %d" % 1)
+pdu_1.add_line(number=1,  name="Outlet %d" % 2,  computer=compute_s2050,   voltage=220, description="Outlet %d" % 2)
+pdu_1.add_line(number=2,  name="Outlet %d" % 3,  computer=compute_s1070,   voltage=220, description="Outlet %d" % 3)
+pdu_1.add_line(number=3,  name="Outlet %d" % 4,  computer=peco_nas,        voltage=220, description="Outlet %d" % 4)
+pdu_1.add_line(number=4,  name="Outlet %d" % 5,  computer=None,            voltage=220, description="Outlet %d" % 5)
+pdu_1.add_line(number=5,  name="Outlet %d" % 6,  computer=None,            voltage=220, description="Outlet %d" % 6)
+pdu_1.add_line(number=6,  name="Outlet %d" % 7,  computer=None,            voltage=220, description="Outlet %d" % 7)
+pdu_1.add_line(number=7,  name="Outlet %d" % 8,  computer=None,            voltage=220, description="Outlet %d" % 8)
+pdu_1.add_line(number=8,  name="Outlet %d" % 9,  computer=compute_0_0,      voltage=220, description="Outlet %d" % 9)
+pdu_1.add_line(number=9,  name="Outlet %d" % 10, computer=compute_0_4,      voltage=220, description="Outlet %d" % 10)
+pdu_1.add_line(number=10, name="Outlet %d" % 11, computer=None,            voltage=220, description="Outlet %d" % 11)
+pdu_1.add_line(number=11, name="Outlet %d" % 12, computer=None,            voltage=220, description="Outlet %d" % 12)
+pdu_1.add_line(number=12, name="Outlet %d" % 13, computer=compute_0_8,      voltage=220, description="Outlet %d" % 13)
+pdu_1.add_line(number=13, name="Outlet %d" % 14, computer=compute_0_12,      voltage=220, description="Outlet %d" % 14)
+pdu_1.add_line(number=14, name="Outlet %d" % 15, computer=None,            voltage=220, description="Outlet %d" % 15)
+pdu_1.add_line(number=15, name="Outlet %d" % 16, computer=tesla_s870,      voltage=220, description="Outlet %d" % 16)
+pdu_1.add_line(number=16, name="Outlet %d" % 17, computer=None,            voltage=220, description="Outlet %d" % 17)
+pdu_1.add_line(number=17, name="Outlet %d" % 18, computer=None,            voltage=220, description="Outlet %d" % 18)
+pdu_1.add_line(number=18, name="Outlet %d" % 19, computer=None,            voltage=220, description="Outlet %d" % 19)
+pdu_1.add_line(number=19, name="Outlet %d" % 20, computer=None,            voltage=220, description="Outlet %d" % 20)
+pdu_1.add_line(number=20, name="Outlet %d" % 21, computer=None,            voltage=220, description="Outlet %d" % 21)
+pdu_1.add_line(number=21, name="Outlet %d" % 22, computer=sw_ethernet_uji, voltage=220, description="Outlet %d" % 22)
+pdu_1.add_line(number=22, name="Outlet %d" % 23, computer=sw_ethernet_hp,  voltage=220, description="Outlet %d" % 23)
+pdu_1.add_line(number=23, name="Outlet %d" % 24, computer=None,            voltage=220, description="Outlet %d" % 24)
+
+pdu_2=PDUDevice(name="PDU2", url="ssh://apc:apc@apc2.act.uji.es", max_frequency=1)
+pdu_2.add_line(number=0,  name="Outlet %d" % 1,  computer=None,        voltage=220, description="Outlet %d" % 1)
+pdu_2.add_line(number=1,  name="Outlet %d" % 2,  computer=None,        voltage=220, description="Outlet %d" % 2)
+pdu_2.add_line(number=2,  name="Outlet %d" % 3,  computer=None,        voltage=220, description="Outlet %d" % 3)
+pdu_2.add_line(number=3,  name="Outlet %d" % 4,  computer=None,        voltage=220, description="Outlet %d" % 4)
+pdu_2.add_line(number=4,  name="Outlet %d" % 5,  computer=None,        voltage=220, description="Outlet %d" % 5)
+pdu_2.add_line(number=5,  name="Outlet %d" % 6,  computer=None,        voltage=220, description="Outlet %d" % 6)
+pdu_2.add_line(number=6,  name="Outlet %d" % 7,  computer=None,        voltage=220, description="Outlet %d" % 7)
+pdu_2.add_line(number=7,  name="Outlet %d" % 8,  computer=tesla_s2050, voltage=220, description="Outlet %d" % 8)
+pdu_2.add_line(number=8,  name="Outlet %d" % 9,  computer=compute_0_0,  voltage=220, description="Outlet %d" % 9)
+pdu_2.add_line(number=9,  name="Outlet %d" % 10, computer=compute_0_4,  voltage=220, description="Outlet %d" % 10)
+pdu_2.add_line(number=10, name="Outlet %d" % 11, computer=None,        voltage=220, description="Outlet %d" % 11)
+pdu_2.add_line(number=11, name="Outlet %d" % 12, computer=None,        voltage=220, description="Outlet %d" % 12)
+pdu_2.add_line(number=12, name="Outlet %d" % 13, computer=compute_0_8,  voltage=220, description="Outlet %d" % 13)
+pdu_2.add_line(number=13, name="Outlet %d" % 14, computer=compute_0_12,  voltage=220, description="Outlet %d" % 14)
+pdu_2.add_line(number=14, name="Outlet %d" % 15, computer=None,        voltage=220, description="Outlet %d" % 15)
+pdu_2.add_line(number=15, name="Outlet %d" % 16, computer=tesla_s1070, voltage=220, description="Outlet %d" % 16)
+pdu_2.add_line(number=16, name="Outlet %d" % 17, computer=None,        voltage=220, description="Outlet %d" % 17)
+pdu_2.add_line(number=17, name="Outlet %d" % 18, computer=None,        voltage=220, description="Outlet %d" % 18)
+pdu_2.add_line(number=18, name="Outlet %d" % 19, computer=None,        voltage=220, description="Outlet %d" % 19)
+pdu_2.add_line(number=19, name="Outlet %d" % 20, computer=None,        voltage=220, description="Outlet %d" % 20)
+pdu_2.add_line(number=20, name="Outlet %d" % 21, computer=None,        voltage=220, description="Outlet %d" % 21)
+pdu_2.add_line(number=21, name="Outlet %d" % 22, computer=None,        voltage=220, description="Outlet %d" % 22)
+pdu_2.add_line(number=22, name="Outlet %d" % 23, computer=None,        voltage=220, description="Outlet %d" % 23)
+pdu_2.add_line(number=23, name="Outlet %d" % 24, computer=None,        voltage=220, description="Outlet %d" % 24)
+"""

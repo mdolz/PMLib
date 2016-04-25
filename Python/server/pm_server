@@ -1,0 +1,96 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+from optparse import OptionParser
+from subprocess import Popen
+import sys
+import os
+import errno
+import signal
+import time
+import settings
+
+__author__ = "$Author: dolzm $"
+
+def pid_exists(pid):
+    try:
+        os.kill(pid, 0)
+        return 1
+    except OSError, err:
+        return err.errno == errno.EPERM
+
+def start():
+    pid_path = "%s/run/pm_server.pid" % (settings.path_)
+    if os.path.exists(pid_path):
+        pid_file = file(pid_path, 'r')
+        pid = int(pid_file.readline())
+        pid_file.close()
+        if pid_exists(pid):
+            sys.exit("ERROR: Instancia ya arrancada PID: %d\n" % pid)
+#    print sys.path
+    os.environ["PYTHONPATH"]= ":".join(sys.path)
+
+    if os.path.exists("nohup.out"):
+        os.remove("nohup.out") 
+
+    p = Popen(["nohup", "python", "%s/daemon/Server.py" % (settings.path_) ])
+#    p = Popen(["python", "daemon/Server.py"])
+    pid_file = file(pid_path, mode = 'w')
+    pid_file.write(str(p.pid))
+    pid_file.close()
+
+#    """
+    p = Popen(["tail", "-f", "nohup.out" ])
+    time.sleep(6)
+    os.kill(p.pid, signal.SIGINT)
+#    """
+
+def stop():
+
+    pid_path = "%s/run/pm_server.pid" % (settings.path_)
+    if os.path.exists(pid_path):
+
+        pid_file = file(pid_path, 'r')
+        pid = int(pid_file.readline())
+        pid_file.close()
+        if pid_exists(pid):
+            #f= open("%s/out" % (settings.path), "w"); f.close()
+            os.kill(pid, signal.SIGINT)
+        os.remove(pid_path)
+#        """
+        p = Popen(["tail", "-f", "nohup.out" ])
+        time.sleep(2)
+        os.kill(p.pid, signal.SIGINT)
+#        """
+    else:
+        sys.exit("ERROR: No existe una instancia arrancada")
+
+def main():
+    # Comprobar si se ejecuta como root
+#    if os.geteuid() != 0:
+#        sys.exit("ERROR: Debes tener privilegios de super-usuario")
+
+    # Parsear línea de comandos
+    parser = OptionParser("usage: %prog --start\n"
+                          "       %prog --stop\n"
+                          "       %prog --restart")
+
+    parser.add_option("-s", "--start",   action = "store_const", const = 0, dest = "cmd", default = 0)
+    parser.add_option("-t", "--stop",    action = "store_const", const = 1, dest = "cmd") 
+    parser.add_option("-r", "--restart", action = "store_const", const = 2, dest = "cmd") 
+
+    (options, args) = parser.parse_args()
+
+    if options.cmd == None:
+        parser.error("Número incorrecto de argumentos")
+
+    if   options.cmd == 0: start()
+    elif options.cmd == 1: stop()
+    elif options.cmd == 2: 
+	stop()
+	start()
+
+
+if __name__ == '__main__':
+    main()
+                
