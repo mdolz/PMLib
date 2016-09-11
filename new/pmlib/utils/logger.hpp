@@ -29,11 +29,8 @@
 
 #include <iostream>
 
-//#include <boost/log/expressions.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
-//#include <boost/log/support/date_time.hpp>
 #include <boost/log/trivial.hpp>
-//#include <boost/log/utility/setup.hpp>
 
 #define CLOG_INFO  BOOST_LOG_SEV(lg::get(), trivial::info)
 #define CLOG_WARN  BOOST_LOG_SEV(lg::get(), trivial::warning)
