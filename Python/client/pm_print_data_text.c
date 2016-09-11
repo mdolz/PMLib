@@ -114,29 +114,36 @@ int pm_print_data_text(char *file_name, counter_t pm_counter, line_t lines, int 
 		last= set+1;		
 	}
 
+	int offset = 0;
+	watts_size = pm_counter.measures->energy.watts_size;
+
 	for( s= init; s < last; s++ )
 	{
 		ini=pm_counter.measures->energy.watts_sets[s];
 		fin=pm_counter.measures->energy.watts_sets[s+1];
 
-		watts_size=pm_counter.measures->energy.watts_size;
 		time=pm_counter.measures->timing[(s*2)+1]-pm_counter.measures->timing[s*2];
-		inc_time=time/(fin-ini-1);	
+		inc_time=time/(fin-ini-1);
+	
+		interval = fin-ini;
 
 		t=0.0;
-		for(i=ini; i<fin; i++)
+		for(i=0; i<interval; i++)
 		{
 			sum=0.0;
 			fprintf(file_data,"%d\t%f\t", s, t);
-	
+			
 			for(j=0;j<n_lines_print;j++)
 			{
-				fprintf(file_data,"%f\t", pm_counter.measures->energy.watts[i+interval*ind_print[j]]);
-				sum+=pm_counter.measures->energy.watts[i+interval*ind_print[j]];
+				fprintf(file_data,"%f\t", pm_counter.measures->energy.watts[offset + ( i+interval*ind_print[j])]);
+				sum+=pm_counter.measures->energy.watts[offset + ( i+interval*ind_print[j])];
 			}
 			fprintf(file_data,"%f\n", sum);
 			t+=inc_time;
 		}
+
+		offset+= (n_lines_counter*interval);
+
 	}
 	free(ind_print);
 	free(ind_lines);

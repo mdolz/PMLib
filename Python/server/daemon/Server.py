@@ -149,7 +149,7 @@ class Server:
         self.clientsocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.clientsocket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.clientsocket.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 120)
-	self.clientsocket.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 120)
+        self.clientsocket.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 120)
         self.clientsocket.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 100)
         self.clientsocket.bind((host, port))
         self.clientsocket.listen(5)

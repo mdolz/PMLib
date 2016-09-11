@@ -1,0 +1,77 @@
+{
+    "server_ip" : "127.0.0.1",
+    "server_port" : 6526,
+    "server_logfile" : "pmlib_%N.log",
+
+    "stxxl_disk_name" : "data.tmp",
+    "stxxl_disk_mb_size" : 1024,
+    "stxxl_disk_properties" : "syscall delete autogrow direct=try",
+
+    "computers" : {
+        "AMD-1" :    { "ip" : "0.0.0.0" },
+        "AMD-2" :    { "ip" : "0.0.0.0" },
+        "AMD-3" :    { "ip" : "0.0.0.0" },
+        "AMD-4" :    { "ip" : "0.0.0.0" },
+        "AMD-5" :    { "ip" : "0.0.0.0" },
+        "Intel-1" :  { "ip" : "0.0.0.0" },
+        "Intel-2" :  { "ip" : "0.0.0.0" },
+        "Intel-3" :  { "ip" : "0.0.0.0" },
+        "Intel-4" :  { "ip" : "0.0.0.0" },
+        "Intel-5" :  { "ip" : "0.0.0.0" },
+        "Switch" :   { "ip" : "0.0.0.0" },
+        "NAS-1" :    { "ip" : "0.0.0.0" },
+        "Frontend" : { "ip" : "0.0.0.0" }
+    },
+
+    "devices" : {
+        "LMG450-1" : { "type" : "LMG450", "url": "/dev/ttyUSB0",
+            "lines" : { 
+                "Outlet 1" : { "number" : 0, "computer" : "Intel-2", "voltage" : 220, "description" : "" },
+                "Outlet 2" : { "number" : 1, "computer" : "Intel-1", "voltage" : 220, "description" : "" },
+                "Outlet 3" : { "number" : 2, "computer" : "AMD-1",   "voltage" : 220, "description" : "" },
+                "Outlet 4" : { "number" : 3, "computer" : "AMD-2",   "voltage" : 220, "description" : "" }
+            }
+        },
+        "LMG450-2" : { "type" : "LMG450", "url": "/dev/ttyUSB1",
+            "lines" : { 
+                "Outlet 1" : { "number" : 0, "computer" : "Intel-2", "voltage" : 220, "description" : "" },
+                "Outlet 2" : { "number" : 1, "computer" : "Intel-1", "voltage" : 220, "description" : "" },
+                "Outlet 3" : { "number" : 2, "computer" : "AMD-1",   "voltage" : 220, "description" : "" },
+                "Outlet 4" : { "number" : 3, "computer" : "AMD-2",   "voltage" : 220, "description" : "" }
+            }
+        },
+        "LMG450-3" : { "type" : "LMG450", "url": "/dev/ttyUSB2",
+            "lines" : { 
+                "Outlet 1" : { "number" : 0, "computer" : "Intel-2", "voltage" : 220, "description" : "" },
+                "Outlet 2" : { "number" : 1, "computer" : "Intel-1", "voltage" : 220, "description" : "" },
+                "Outlet 3" : { "number" : 2, "computer" : "AMD-1",   "voltage" : 220, "description" : "" },
+                "Outlet 4" : { "number" : 3, "computer" : "AMD-2",   "voltage" : 220, "description" : "" }
+            }
+        },
+        "WattsUp-1" : { "type" : "WattsUp", "url": "/dev/ttyUSB0",
+            "lines" : { 
+                "offsetutlet 1" : { "number" : 0, "computer" : "Intel-2", "voltage" : 220, "description" : "" }
+            }
+        }, 
+        "ArduPower" : { "type" : "ArduPower", "computer" : "AMD-5", "url" : "/dev/ttyACM0",
+            "lines" : {
+                "24p-01c-3.3v"    : { "number" : 0,  "voltage" : 3.3, "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "HDD-SAT-5v"      : { "number" : 1,  "voltage" : 5,   "description" : "", "slope" : 69.9332761719, "offset" : 192.67 },
+                "24p-02c-3.3v"    : { "number" : 2,  "voltage" : 3.3, "description" : "", "slope" : 72.0016991302, "offset" : 193.11 },
+                "HDD-SAT-12v"     : { "number" : 3,  "voltage" : 12,  "description" : "", "slope" : 70.8100589449, "offset" : 193.07 },
+                "24p-04c-5v"      : { "number" : 4,  "voltage" : 5,   "description" : "", "slope" : 72.0078867850, "offset" : 194.97 },
+                "08p-2nd-12v-1"   : { "number" : 5,  "voltage" : 12,  "description" : "", "slope" : 69.6503691096, "offset" : 186.98 },
+                "24p-06c-5v"      : { "number" : 6,  "voltage" : 5,   "description" : "", "slope" : 71.2795878411, "offset" : 195.57 },
+                "08p-1st-12v-1"   : { "number" : 7,  "voltage" : 12,  "description" : "", "slope" : 65.9691784663, "offset" : 192.37 },
+                "24p-23c-5v"      : { "number" : 8,  "voltage" : 5,   "description" : "", "slope" : 71.8246793103, "offset" : 188.22 },
+                "08p-1st-12v-2"   : { "number" : 9,  "voltage" : 12,  "description" : "", "slope" : 67.0736180009, "offset" : 191.60 },
+                "24p-12,13c-3.3v" : { "number" : 10, "voltage" : 3.3, "description" : "", "slope" : 71.0547210500, "offset" : 191.25 },
+                "24p-10c-12v"     : { "number" : 11, "voltage" : 12,  "description" : "", "slope" : 68.1271175427, "offset" : 188.17 },
+                "08p-2nd-12v-2"   : { "number" : 12, "voltage" : 12,  "description" : "", "slope" : 71.5951535529, "offset" : 191.68 },
+                "24p-11c-12v"     : { "number" : 13, "voltage" : 12,  "description" : "", "slope" : 67.8861848384, "offset" : 192.63 },
+                "24p-21c-5v"      : { "number" : 14, "voltage" : 5,   "description" : "", "slope" : 72.1452259359, "offset" : 194.16 },
+                "24p-22c-5v"      : { "number" : 15, "voltage" : 5,   "description" : "", "slope" : 70.4234197519, "offset" : 189.42 }
+            }
+        }       
+    }
+}

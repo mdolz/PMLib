@@ -72,17 +72,17 @@ def show(client, lines= False, counters= False):
         dev_counters= receive_data(client, "i")
         if dev_counters and counters:
             print "  * Counters:"
-        for con in xrange(dev_counters):
-            counter_id   = receive_data(client, "i")
-            counter_add  = client.recv( receive_data(client, "i") )
-            counter_lines= receive_data(client, "i")
-            counter_lines_array= []
+            for con in xrange(dev_counters):
+                counter_id   = receive_data(client, "i")
+                counter_add  = client.recv( receive_data(client, "i") )
+                counter_lines= receive_data(client, "i")
+                counter_lines_array= []
 
-            for lin in xrange(counter_lines):
-                counter_lines_array.append( str(receive_data(client, "i")) )
+                for lin in xrange(counter_lines):
+                    counter_lines_array.append( str(receive_data(client, "i")) )
 
-            if counters:
-                print "    - Counter: %2d - Address: %s - Selected lines: %s" % (counter_id, counter_add, ":".join(counter_lines_array))
+                if counters:
+                    print "    - Counter: %2d - Address: %s - Selected lines: %s" % (counter_id, counter_add, ":".join(counter_lines_array))
 
         print
 
@@ -120,7 +120,7 @@ def readdevice(client, dev_name, frequency):
                 lines_array.append( "%.2f" % (line_power) )
 
             print "%s - %s =  %2.2f" % (time.strftime("%H:%M:%S", time.localtime()), sample[:-2], sum_)
-            send_all_data(client, struct.pack("i", 1) )
+           # send_all_data(client, struct.pack("i", 1) )
 
 if __name__ == "__main__":
 

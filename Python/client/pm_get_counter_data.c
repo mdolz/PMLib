@@ -119,7 +119,6 @@ int pm_get_counter_data( counter_t *pm_counter ){
   /* Receive watts_sets_size */
   memcpy((void *)&server_response, (void *)buffer2, sizeof(server_response));
 
-
 /* Store watts_sets_size */
   (pm_counter->measures)->energy.watts_sets_size = server_response;
 
@@ -151,7 +150,6 @@ int pm_get_counter_data( counter_t *pm_counter ){
   string=(char*) malloc(message_len);
   ptr_buffer=(void *)string;
 
-
   if ((bytes = recv(pm_counter->sock, ptr_buffer, message_len, MSG_WAITALL)) != message_len ) {
         perror("Failed to receive the rest of the message from server in get counter");
          exit(1);
@@ -161,6 +159,7 @@ int pm_get_counter_data( counter_t *pm_counter ){
   /* Store the values of array watts_sets */
   for (i=0; i<(pm_counter->measures)->energy.watts_sets_size; i++){
       memcpy((void *)&elem_watts_sets, (void *)ptr_buffer, sizeof(elem_watts_sets));
+    //  printf("%d - ", elem_watts_sets);
       (pm_counter->measures)->energy.watts_sets[i] = elem_watts_sets;
       ptr_buffer = (void *) (((long) ptr_buffer) + sizeof(elem_watts_sets));
       }
@@ -168,6 +167,7 @@ int pm_get_counter_data( counter_t *pm_counter ){
   /* Store the values of array watts */
   for (i=0; i<(pm_counter->measures)->energy.watts_size; i++){
       memcpy((void *)&elem_watts, (void *)ptr_buffer, sizeof(elem_watts));
+    //  printf("%f - ", elem_watts);
       (pm_counter->measures)->energy.watts[i] = elem_watts;
       ptr_buffer = (void *) (((long) ptr_buffer) + sizeof(elem_watts));
  }
