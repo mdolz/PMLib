@@ -79,12 +79,13 @@ namespace PMLib
 
         io_service* _io_service;
         tcp::acceptor _acceptor;
+        bool _daemonize;
 
       public:
         map<string, device_ptr> device_map;
         vector<counter_ptr> counters;
 
-        Server(boost::asio::io_service* ios, string configfile);
+        Server(boost::asio::io_service* ios, string configfile, bool daemonize);
         Server(const Server& s);
 
         device_ptr get_device(string name) const;

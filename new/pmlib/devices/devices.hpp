@@ -27,7 +27,7 @@
 #ifndef DEVICES_LIST_HPP
 #define DEVICES_LIST_HPP
 
-#include "LMG450.hpp"
+#include "LMG.hpp"
 #include "ArduPower.hpp" 
 #include "WattsUp.hpp"
 

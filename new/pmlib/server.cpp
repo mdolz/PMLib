@@ -33,7 +33,7 @@
 #include <chrono> 
 #include <fstream>
 #include <iomanip>
- 
+
 #ifdef USE_STXXL  
     #include <stxxl/mng>
 #endif
@@ -54,6 +54,7 @@
 #include "info.hpp" 
 #include "utils/color.hpp"
 #include "utils/logger.hpp"
+#include "utils/daemonize.hpp"
 #include "utils/json/json.h"
 #include "devices/devices.hpp"
 
@@ -68,8 +69,8 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(lg, logger_t) {
     return logger_type();
 }
 
-Server::Server(boost::asio::io_service* ios, string configfile) : 
-    _io_service{ios}, _acceptor{*ios} {
+Server::Server(boost::asio::io_service* ios, string configfile, bool daemonize) : 
+    _io_service{ios}, _acceptor{*ios}, _daemonize{daemonize} {
     parse_configfile(configfile);
 }
 
@@ -196,11 +197,15 @@ void Server::start_connection() {
         async_accept();        
         cout << green << "[  OK  ]" << def << endl << flush;
         cout << "Server listening at (" << ep.address().to_string() << ", " << _port << ")" << endl;
+
+        if ( _daemonize && daemonize("pmlib.pid") != 0 )  
+            throw std::runtime_error("Daemonize failed");
+
         _io_service->run();
     } 
     catch(std::exception& e) {
         cout << red << "[FAILED]" << def << endl << flush;
-        cerr << "Exception wile creating TCP socket on port "<< _port << ": " << e.what() << std::endl;
+        cerr << "Exception: " << e.what() << std::endl;
         stop_devices();
         exit(0);
     }

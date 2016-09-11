@@ -24,89 +24,128 @@
  * =========================================================================
 */
 
-#include <ostream>
-
 #ifndef DAEMONIZE_HPP
 #define DAEMONIZE_HPP
+
+#include <iostream>
+#include <ostream>
+#include <fstream> 
+#include <string>
+#include <fcntl.h>
+#include <unistd.h>
+#include "logger.hpp"
+
+using namespace std;
+using namespace PMLib;
 
 namespace PMLib {
 
     void signal_handler(int sig) {
-        CLOG_WARN << "Unhandled signal: " << sig;
-         
-        //switch(sig)
-        //{
-         //   case SIGHUP:
-         //       CLOG_WARN << "Received SIGHUP signal";
-         //       break;
-         //   case SIGINT:
-         //   case SIGTERM:
-         //       exit(EXIT_SUCCESS);
-         //       break;
-        //    default:
-        //}
+        CLOG_WARN << "Unhandled signal: " << sig << endl;
     }
- 
-    void daemonize(char *rundir, char *pidfile)
-    {
-        int pid, sid, i;
-        char str[10];
-        struct sigaction newSigAction;
-        sigset_t newSigSet;
-         
-        /* Check if parent process id is set */
-        if (getppid() == 1) return;
- 
-        /* Set signal mask - signals we want to block */
-        sigemptyset(&newSigSet);
-        sigaddset(&newSigSet, SIGCHLD);  /* ignore child - i.e. we don't need to wait for it */
-        sigaddset(&newSigSet, SIGTSTP);  /* ignore Tty stop signals */
-        sigaddset(&newSigSet, SIGTTOU);  /* ignore Tty background writes */
-        sigaddset(&newSigSet, SIGTTIN);  /* ignore Tty background reads */
-        sigprocmask(SIG_BLOCK, &newSigSet, NULL);   /* Block the above specified signals */
+
+    void write_pidfile(string pid_filename) {
+        ofstream pidfile;
+        pidfile.open(pid_filename, std::ofstream::out | std::ofstream::trunc);
         
-        /* Set up a signal handler */
-        newSigAction.sa_handler = signal_handler;
-        sigemptyset(&newSigAction.sa_mask);
-        newSigAction.sa_flags = 0;
-
-        sigaction(SIGHUP, &newSigAction, NULL);     /* catch hangup signal */
-        //sigaction(SIGTERM, &newSigAction, NULL);    /* catch term signal */
-        sigaction(SIGINT, &newSigAction, NULL);     /* catch interrupt signal */
+        if ( !pidfile.is_open() ) {
+            CLOG_ERROR << "Could not open PID lock file " << pid_filename << ", exiting" << endl;
+            cerr << "Could not open PID lock file " << pid_filename << ", exiting" << endl;
+            exit(-1);
+        }
+        else {
+            pidfile << getpid() << endl;
+            pidfile.close();
+        }
+    }    
  
-        pid = fork();
-        if ( pid < 0 ) exit(-1);
-        if ( pid > 0 ) exit(0);
-         
-        umask(027); /* Set file permissions 750 */
-         
-        if (setsid() < 0) exit(EXIT_FAILURE);
-         
-        for (i = getdtablesize(); i >= 0; --i)
-            close(i);
-         
-        i = open("/dev/null", O_RDWR);
-        dup(i);
-        dup(i);
-         
-        chdir(rundir);
-         
-        pidFilehandle = open(pidfile, O_RDWR|O_CREAT, 0600);
-         
-        if (pidFilehandle == -1 ) {
-            CLOG_INFO << "Could not open PID lock file " << pidfile << ", exiting" << endl;
-            exit(EXIT_FAILURE);
-        }
-         
-        if (lockf(pidFilehandle,F_TLOCK,0) == -1) {
-            CLOG_INFO << "Could not open PID lock file " << pidfile << ", exiting" << endl;
-            exit(EXIT_FAILURE);
-        }
-        sprintf(str,"%d\n",getpid());
-        write(pidFilehandle, str, strlen(str));
-        close(pidFilehandle);
-    }
+    int daemonize(string pidfile)
+    {
+        try {
 
+            if (getppid() == 1) return -1;
+
+            struct sigaction newSigAction;
+            sigset_t newSigSet;
+
+            /* Set signal mask - signals we want to block */
+            sigemptyset(&newSigSet);
+            sigaddset(&newSigSet, SIGCHLD);  /* ignore child - i.e. we don't need to wait for it */
+            sigaddset(&newSigSet, SIGTSTP);  /* ignore Tty stop signals */
+            sigaddset(&newSigSet, SIGTTOU);  /* ignore Tty background writes */
+            sigaddset(&newSigSet, SIGTTIN);  /* ignore Tty background reads */
+            sigprocmask(SIG_BLOCK, &newSigSet, NULL);   /* Block the above specified signals */
+
+             /* Set up a signal handler */
+            newSigAction.sa_handler = PMLib::signal_handler;
+            sigemptyset(&newSigAction.sa_mask);
+            newSigAction.sa_flags = 0;
+
+            sigaction(SIGHUP, &newSigAction, NULL);     /* catch hangup signal */
+            //sigaction(SIGTERM, &newSigAction, NULL);    /* catch term signal */
+            //sigaction(SIGINT, &newSigAction, NULL);     /* catch interrupt signal */
+
+            if (pid_t pid = fork()) {
+                if (pid > 0) {
+                    exit(0);
+                }
+                else {
+                    CLOG_ERROR << "Daemonize: first fork failed" << endl;
+                    return -1;
+                }
+            }
+
+            setsid();
+            chdir("/");
+            umask(0);
+
+            if (pid_t pid = fork()) {
+                if (pid > 0) {
+                    exit(0);
+                }
+                else {
+                    CLOG_ERROR << "Daemonize: second fork failed" << endl;
+                    return -1;
+                }
+            }
+
+            // Close the standard streams. This decouples the daemon from the terminal
+            // that started it.
+            close(0);
+            close(1);
+            close(2);
+
+            if (open("/dev/null", O_RDONLY) < 0) {
+                CLOG_ERROR << "Daemonize: unable to open /dev/null" << endl;
+                return -1;
+            }
+
+            // Send standard output to a log file.
+            const char *output = "pmlib.out";
+            const int flags = O_WRONLY | O_CREAT | O_APPEND;
+            const mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+
+            if (open(output, flags, mode) < 0) {
+                CLOG_ERROR << "Daemonize: unable to open output file" << endl;
+                return -1;
+            }
+
+            if (dup(1) < 0) {
+               CLOG_ERROR << "Daemonize: unable to dup output descriptor" << endl;
+                return -1;
+            }
+
+            write_pidfile(pidfile);
+
+            CLOG_INFO << "PMLib daemon started" << endl;
+
+        }
+        catch (std::exception& e) {
+            CLOG_ERROR << "Exception: %s" << e.what() << endl;;
+            cerr << "Exception: " << e.what() << endl;
+        } 
+        return 0;      
+    }
 }
 
 #endif
