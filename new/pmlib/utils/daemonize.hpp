@@ -121,7 +121,7 @@ namespace PMLib {
             }
 
             // Send standard output to a log file.
-            const char *output = "pmlib.out";
+            const char *output = "/var/log/pmlib.out";
             const int flags = O_WRONLY | O_CREAT | O_APPEND;
             const mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 

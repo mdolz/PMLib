@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <getopt.h>
 #include "server.hpp"
 
@@ -39,31 +40,31 @@ void printUsage(const std::string & progName){
 int main(int argc, char *argv[]) {
 
     int all = 0;
-    int daemonize; //verbose;
-    string configfile;
+    int daemonize = false; //verbose;
+    string configfile = "";
 
-    static struct option options[] = {
-        {"damonize",     required_argument, 0,            'd'},
+    static struct option long_options[] = {
+        {"damonize",     no_argument,       0,            'd'},
         {"configfile",   required_argument, 0,            'c'},
         {0,              0,                 0,              0}
     };
 
     int index = 0;
     int opt = 0;
-    while ((opt = getopt_long(argc, argv,"d:c:", options, &index )) != -1) {
+    while ((opt = getopt_long(argc, argv,"dc:", long_options, &index )) != -1) {
         switch (opt) {
             case 0:
-                if(options[index].flag != 0){
+                if (long_options[index].flag != 0)
                     break;
-                }else{
-                   // throw std::runtime_error("option " + std::string(options[index].name) +
-                   //                          " with arg " + optarg + " without flags");
-                }
+                cerr << "Error: option " << long_options[index].name;
+                if (opt)
+                    cerr << " with arg " << optarg;
+                cerr << endl;
                 break;
             case 'd': 
                 daemonize = true;
                 break;
-            case 'v':
+            case 'c':
                 configfile = string(optarg);            
                 break;
             default: {
@@ -73,11 +74,20 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    boost::asio::io_service ios{};
-//    string configfile = "../settings-test.json";
-   
-    PMLib::Server( &ios, configfile, daemonize ).run();
-//    s.run();
+    if ( configfile != "" ) {
+        ifstream file(configfile);
+        if( ! file.fail() ) {
+            boost::asio::io_service ios{};
+            PMLib::Server( &ios, configfile, daemonize ).run();           
+        } 
+        else {
+            cerr << "Configuration file \"" << configfile << "\" not found!" << endl;
+            return -1;
+        }
+    }
+    else {
+        printUsage(argv[0]);
+    }
 
     return 0;
 }

@@ -41,7 +41,7 @@ map_type *Device::device_register;
 
 Device::Device(string name, string url, int max_freq, int n_lines, bool pdu, function<void()> readf) : 
     _name{name}, _url{url}, _max_frequency{max_freq}, _n_lines{n_lines}, _pdu{pdu}, the_thread(), 
-    _working{false}, _running{true}, _readf{readf}, sample(n_lines, 0), spsc_queue() {}
+    _working{false}, _running{true}, _readf{readf}, sample(n_lines, 0), data_queue() {}
 
 Device::~Device() {
     _running = false;
@@ -136,8 +136,8 @@ void Device::run() {
     vector<double> _sample;
     std::thread read_thr( _readf );
     while ( is_running() ) {
-        while( !spsc_queue.empty() && is_running() ) {
-            while( !spsc_queue.pop( _sample ) );
+        while( !data_queue.empty() && is_running() ) {
+            while( !data_queue.pop( _sample ) );
             push_back_data(_sample);
            // for ( auto &v: sample_) cout << v << " "; cout << endl;
         }
