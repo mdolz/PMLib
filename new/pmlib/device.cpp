@@ -33,7 +33,7 @@
 #include "device.hpp"
 #include "server.hpp" 
 #include "counter.hpp"
-//#include "utils/logger.hpp"
+#include "utils/logger.hpp"
 
 namespace PMLib {
 
@@ -128,22 +128,33 @@ void Device::stop() {
 }
 
 void Device::run() {
+    
     if (lines.size() < _n_lines) {
         start_cv.notify_all();
         return;
     }
 
     vector<double> _sample;
-    std::thread read_thr( _readf );
+
+    std::thread read_thr( [&] () {
+        try { 
+            _readf();
+        }
+        catch (std::exception& e) {
+            CLOG_ERROR << "Error starting the device: " << e.what() << endl;
+            cerr << "Error starting the device: " << e.what() << endl;
+        }
+    } );
+
     while ( is_running() ) {
         while( !data_queue.empty() && is_running() ) {
             while( !data_queue.pop( _sample ) );
             push_back_data(_sample);
-           // for ( auto &v: sample_) cout << v << " "; cout << endl;
-        }
-        if ( !is_working() ) {
-            _working.store(true);
-            start_cv.notify_all();
+           // for ( auto &v: sample_) cout << v << " "; cout << endl;        
+            if ( !is_working() ) {
+                _working.store(true);
+                start_cv.notify_all();
+            }
         }
         // This is important as it avoids a full busy-wait loop!
         this_thread::sleep_for(chrono::microseconds((int)(1e6/_max_frequency)));
@@ -161,6 +172,7 @@ void Device::run() {
     */
 
     stop_cv.notify_all();
+
 }
 
 // end namespace PMLib

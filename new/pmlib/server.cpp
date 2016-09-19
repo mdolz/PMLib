@@ -280,13 +280,16 @@ void Server::parse_configfile(string config_filename) {
 
             auto &lines = d["lines"];
             if ( !dev ) {
-                throw std::runtime_error("Error: Module of type " + d["type"].asString() + "for device " + dn + " is not currently supported!");
+                throw std::runtime_error("Error: Module of type " + d["type"].asString() + 
+                    "for device " + dn + " is not currently supported!");
             }
             else if ( lines.isNull() ) {
                 throw std::runtime_error("Error: Device " + dn + " has no lines defined!");
             }
             else if ( lines.getMemberNames().size() != dev->get_num_lines() ) {
-                throw std::runtime_error("Error: Device " + dn +" requires exactly " + to_string(dev->get_num_lines()) + " lines, but " + to_string(lines.getMemberNames().size()) + " are defined!");
+                throw std::runtime_error("Error: Device " + dn +" requires exactly " + 
+                    to_string(dev->get_num_lines()) + " lines, but " + 
+                    to_string(lines.getMemberNames().size()) + " are defined!");
             } 
             /* No need to check for an already present device in device_map, JSON controls this! 
             else if ( !device_map.insert( make_pair( d, dev ) ).second ) {
@@ -311,9 +314,11 @@ void Server::parse_configfile(string config_filename) {
                 else if ( l["number"].asInt() >= 0 && 
                      l["number"].asInt() < lines.getMemberNames().size() && 
                      check_lines[l["number"].asInt()] )
-                    throw std::runtime_error("Error: Line number " + to_string(l["number"].asInt()) + " of device " + dn + " is defined more than once!");
+                    throw std::runtime_error("Error: Line number " + to_string(l["number"].asInt()) + 
+                        " of device " + dn + " is defined more than once!");
                 else
-                    throw std::runtime_error("Error: Line number " + to_string(l["number"].asInt()) + " of device " + dn + " should be between 0 and " + to_string(lines.getMemberNames().size()-1) + "!");
+                    throw std::runtime_error("Error: Line number " + to_string(l["number"].asInt()) + 
+                        " of device " + dn + " should be between 0 and " + to_string(lines.getMemberNames().size()-1) + "!");
 
                 Computer c = ( dev->is_pdu() && 
                              ( l["computer"].isNull() || 

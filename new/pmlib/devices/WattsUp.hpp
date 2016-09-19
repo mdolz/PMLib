@@ -27,6 +27,10 @@
 #ifndef WATTSUP_HPP
 #define WATTSUP_HPP
 
+#include <boost/algorithm/string.hpp>
+
+using namespace boost::asio;
+
 namespace PMLib
 {
 	template <int n_lines = 1, int max_freq = 1, bool pdu = false>
@@ -36,11 +40,43 @@ namespace PMLib
             Device(name, url, max_freq, n_lines, pdu, 
             [&] () {
 
-            while ( is_running() ){ 
-                sample[0]++;
-                yield(sample);
-                this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
-            }
+                io_service io;
+                serial_port port( io, url );
+
+                port.set_option( serial_port_base::baud_rate( 115200 ) );
+                port.set_option( serial_port_base::character_size( 8 ) );
+                port.set_option( serial_port_base::flow_control( serial_port_base::flow_control::none ) );
+                port.set_option( serial_port_base::parity( serial_port_base::parity::none ) );
+                port.set_option( serial_port_base::stop_bits( serial_port_base::stop_bits::one ) );
+
+                function<void(string)> sendstr = [&](string s) 
+                    {  write(port, buffer(s.c_str(),  sizeof(char)*s.size()));  };
+
+                sendstr("#L,R,0;"); // stop;
+                sendstr("#R,W,0;"); // reset;
+                sendstr("#L,W,3,E,1,1;"); // start;
+
+                boost::asio::streambuf buff;
+                istream is(&buff);
+                string line;
+                vector<string> vsample;
+
+                while ( is_running() ){ 
+
+                    read_until(port, buff, ";\r\n");
+                    getline(is, line);
+                    boost::split(vsample, line, boost::is_any_of(","));
+
+                    if ( vsample.size() == 21 ) {
+                        sample[0] = stod( vsample[3] ) * 1e-1;
+                    }
+
+                    yield(sample);
+                   // this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
+                }
+
+                port.close();
+                io.stop();
 
         } ) {};   
     };
