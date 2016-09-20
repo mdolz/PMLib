@@ -202,7 +202,7 @@ void Counter::get() {
                     const auto &line = dev->get_line_data(l);
                   //  cout << "  LINE " << l << " DATA: "; cout << line.size() << endl; //for ( auto &d:line) cout << d << " "; cout << endl;
                   //  cout << "    RANGE: [ " << se.first[l] << ", " << 
-                  //   min( min(se.second.get()[l], se.first[l]+min_len[se_idx]), (long long) line.size()) << " ] "<<endl;
+                  //  min( min(se.second.get()[l], se.first[l]+min_len[se_idx]), (long long) line.size()) << " ] "<<endl;
 
                     int before= watts.size();
                     int i = 0;

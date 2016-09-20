@@ -39,7 +39,8 @@ namespace PMLib
         WattsUp(string name, string url) :
             Device(name, url, max_freq, n_lines, pdu, 
             [&] () {
-
+                /*
+                // Experimental code
                 io_service io;
                 serial_port port( io, url );
 
@@ -61,7 +62,7 @@ namespace PMLib
                 string line;
                 vector<string> vsample;
 
-                while ( is_running() ){ 
+                while ( is_running() ) { 
 
                     read_until(port, buff, ";\r\n");
                     getline(is, line);
@@ -77,8 +78,16 @@ namespace PMLib
 
                 port.close();
                 io.stop();
+                */
 
-        } ) {};   
+                while ( is_running() ) { 
+                    sample[0] += 1;
+
+                    yield( sample );
+                    this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
+                } 
+
+            } ) {};   
     };
 
     static RegisterDevice< WattsUp<> > Reg_WattsUp("WattsUp");
