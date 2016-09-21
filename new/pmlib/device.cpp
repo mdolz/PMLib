@@ -181,7 +181,7 @@ void Device::run() {
         this_thread::sleep_for(chrono::microseconds((int)(1e6/_max_frequency)));
     }
 
-    avg_thr.join();
+//    avg_thr.join();
     read_thr.join();
 
     /* Old version with coroutines
