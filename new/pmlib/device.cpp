@@ -134,7 +134,7 @@ void Device::run() {
     }
 
     vector<double> _sample;
-
+/*
     std::thread avg_thr( [&] () {
 
         vector<double> s;
@@ -155,7 +155,7 @@ void Device::run() {
         }        
 
     } );
-
+*/
     std::thread read_thr( [&] () {
         try { 
             _readf();
@@ -170,7 +170,7 @@ void Device::run() {
         while( !data_queue.empty() && is_running() ) {
             while( !data_queue.pop( _sample ) );
             push_back_data(_sample);
-            avg_queue.push( _sample ); 
+//            avg_queue.push( _sample ); 
            // for ( auto &v: sample_) cout << v << " "; cout << endl;        
             if ( !is_working() ) {
                 _working.store(true);
