@@ -43,12 +43,12 @@ Info::Info(socket_ptr sock, Operation op, Server* server) :
 
 void Info::list_devices() {
     for (auto &dev : _server->device_map)
-    	send(_sock, dev.second->get_name());
+        send(_sock, dev.second->get_name());
 }
 
 void Info::info_device() {
-	string device_name;
-	receive(_sock, device_name);
+    string device_name;
+    receive(_sock, device_name);
     device_ptr dev = _server->get_device(device_name);
     if ( !dev ) {
         CLOG_ERROR << "Device " << device_name << " could not be found!" << endl;
@@ -56,69 +56,69 @@ void Info::info_device() {
         return;
     }
     send<int>(_sock, dev->get_max_freq() );
-    send<int>(_sock, dev->get_num_lines() );   	
+    send<int>(_sock, dev->get_num_lines() );       
     send(_sock, dev->get_name() );
 }
 
 void Info::cmd_status() {
-	send<int>(_sock, _server->device_map.size());
-	for (auto &dev : _server->device_map) {
-		send(_sock, dev.second->get_name());
-		send<int>(_sock, dev.second->get_max_freq());
-		send<int>(_sock, dev.second->get_num_lines());
+    send<int>(_sock, _server->device_map.size());
+    for (auto &dev : _server->device_map) {
+        send(_sock, dev.second->get_name());
+        send<int>(_sock, dev.second->get_max_freq());
+        send<int>(_sock, dev.second->get_num_lines());
 
-		if ( dev.second->is_pdu() ) {
-			send<int>(_sock, (int)Devtype::MULTIPLE);
-		} else {
-			send<int>(_sock, (int)Devtype::SINGLE);
-			send(_sock, dev.second->computer._name);
-		}
-
-		for (auto &lin : dev.second->get_lines()) {
-			send<int>(_sock, lin.second->_id);
-			send(_sock, lin.second->_name);
-			send(_sock, lin.second->_voltage);
-			send(_sock, lin.second->_description);
-
-			if ( dev.second->is_pdu() )
-				send(_sock, lin.second->_computer._name);
+        if ( dev.second->is_pdu() ) {
+            send<int>(_sock, (int)Devtype::MULTIPLE);
+        } else {
+            send<int>(_sock, (int)Devtype::SINGLE);
+            send(_sock, dev.second->computer._name);
         }
 
-		send<int>(_sock, dev.second->counter_map.size());
-		for (auto &cnt : dev.second->counter_map ) {	
+        for (auto &lin : dev.second->get_lines()) {
+            send<int>(_sock, lin.second->_id);
+            send(_sock, lin.second->_name);
+            send(_sock, lin.second->_voltage);
+            send(_sock, lin.second->_description);
+
+            if ( dev.second->is_pdu() )
+                send(_sock, lin.second->_computer._name);
+        }
+
+        send<int>(_sock, dev.second->counter_map.size());
+        for (auto &cnt : dev.second->counter_map ) {    
             send<int>(_sock, cnt.second->get_id());
             send(_sock, cnt.second->get_client_ip());
             send(_sock, cnt.second->get_lines() );
-		}
-	}
+        }
+    }
 }
 
 void Info::read_device() {
-	int frequency, max_frequency; //, ack;
-	string device_name;
-	receive(_sock, device_name);
-	receive(_sock, frequency);
+    int frequency, max_frequency; //, ack;
+    string device_name;
+    receive(_sock, device_name);
+    receive(_sock, frequency);
  
     device_ptr dev = _server->get_device(device_name);
     if ( !dev ) {
         send<int>(_sock, (int)Retval::ERROR);
         CLOG_ERROR << "Device " << device_name << " could not be found!" << endl;        
-    	return;
+        return;
     }
 
     max_frequency = dev->get_max_freq();
     if ( frequency > max_frequency ) {
-		send<int>(_sock, (int)Retval::ERRORF);
+        send<int>(_sock, (int)Retval::ERRORF);
         send(_sock, max_frequency);
         CLOG_ERROR << "Frequency requested is too high for the device!" << endl;
-		return;
+        return;
     }
 
-	send<int>(_sock, (int)Retval::SUCCESS);
+    send<int>(_sock, (int)Retval::SUCCESS);
     float sleep_time = 1e6 / ((frequency > 0) ? frequency : max_frequency);
 
     try {    
-	    while ( true ) {
+        while ( true ) {
             send(_sock, dev->get_sample() );
             this_thread::sleep_for(chrono::microseconds((int)sleep_time));
         }

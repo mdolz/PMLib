@@ -101,7 +101,6 @@ const vector_type& Device::get_line_data(int l) {
     return lines[l]->get_data();
 }
 
-
 void Device::start_counter(const vector<int> &sel_lines) {
     counter_lock.lock();
     for (auto const &l : sel_lines) {
@@ -136,6 +135,27 @@ void Device::run() {
 
     vector<double> _sample;
 
+    std::thread avg_thr( [&] () {
+
+        vector<double> s;
+        boost::circular_buffer<vector<double>> cb(_max_frequency);
+        vector<double> avg_1m, avg_30s, avg_10s, avg_1s;
+     //   int avg_1m_first, , avg_30s, avg_10s, avg_1s;
+
+        while ( is_running() ) {
+            while( !avg_queue.empty() && is_running() ) {
+                while( !avg_queue.pop( s ) );
+                cb.push_back(s);
+                for ( auto &v : cb )
+                    for ( auto &vi : v)
+                        
+            }
+            // This is important as it avoids a full busy-wait loop!
+            this_thread::sleep_for(chrono::microseconds((int)(1e6/_max_frequency)));
+        }        
+
+    } );
+
     std::thread read_thr( [&] () {
         try { 
             _readf();
@@ -150,6 +170,7 @@ void Device::run() {
         while( !data_queue.empty() && is_running() ) {
             while( !data_queue.pop( _sample ) );
             push_back_data(_sample);
+            avg_queue.push( _sample ); 
            // for ( auto &v: sample_) cout << v << " "; cout << endl;        
             if ( !is_working() ) {
                 _working.store(true);
@@ -159,6 +180,8 @@ void Device::run() {
         // This is important as it avoids a full busy-wait loop!
         this_thread::sleep_for(chrono::microseconds((int)(1e6/_max_frequency)));
     }
+
+    avg_thr.join();
     read_thr.join();
 
     /* Old version with coroutines

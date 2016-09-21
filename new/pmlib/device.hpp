@@ -115,7 +115,7 @@ namespace PMLib
 
       protected:
         vector<double> sample;
-        spsc_queue<vector<double>, capacity<10000> > data_queue;
+        spsc_queue<vector<double>, capacity<10000> > data_queue, avg_queue;
         inline void yield(vector<double> &s){ data_queue.push(s); };
         static map_type *get_map() {           
             if(!device_register) { device_register = new map_type; } 

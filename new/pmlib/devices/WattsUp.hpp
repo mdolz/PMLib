@@ -33,7 +33,7 @@ using namespace boost::asio;
 
 namespace PMLib
 {
-	template <int n_lines = 1, int max_freq = 1, bool pdu = false>
+    template <int n_lines = 1, int max_freq = 1, bool pdu = false>
     class WattsUp : public Device {
       public:
         WattsUp(string name, string url) :
@@ -73,7 +73,6 @@ namespace PMLib
                     }
 
                     yield(sample);
-                   // this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
                 }
 
                 port.close();
