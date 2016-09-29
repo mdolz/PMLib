@@ -27,9 +27,7 @@
 #ifndef APCAPE_HPP
 #define APCAPE_HPP
 
-//#include <sys/ioctl.h>
-//#include <linux/i2c-dev.h>
-
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <cstdio>
@@ -37,6 +35,8 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
+
+using namespace std::chrono;
 
 class INA219
 {
@@ -313,7 +313,7 @@ class INA219
 
 namespace PMLib
 {
-    template <int n_lines = 8, int max_freq = 300, bool pdu = false>
+    template <int n_lines = 8, int max_freq = 1200, bool pdu = false>
     class APCape : public Device {
       public:
         APCape(string name, string url) :
@@ -328,12 +328,23 @@ namespace PMLib
               devs.emplace_back( new INA219( "/dev/i2c-2", addr[i] ) );
 
             while ( is_running() ){ 
+                auto t1 = system_clock::now();
+
                 for( auto i = 0; i < n_lines; i++ )
                   sample[i] = devs[i]->getPower_mW();
 
                 yield( sample );
 
-                //this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
+                auto t2 = system_clock::now();
+
+                auto dms = duration_cast<microseconds>(t2 - t1);
+                //std::cout << "Measurement took " << dms.count() << " microseconds" << std::endl;
+
+		if( dms.count() < (int)(1e6/max_freq) )
+                {
+                  //std::cout << "Will sleep: " << (int)(1e6/max_freq) - dms.count() << " microseconds" << std::endl;
+                  this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq) - dms.count()));
+                }
             }
 
         } ) {};   
