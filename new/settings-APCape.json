@@ -1,0 +1,19 @@
+{
+	"server_ip"    : "127.0.0.1",
+	"server_port"  : 6526,
+	"log_filename" : "/opt/pmlib/log/powermeter.log",
+
+    "computers" : {
+        "BeagleBone" :    { "ip" : "0.0.0.0" }
+   	},
+
+    "devices" : {
+	"APCape2L" : { "type" : "APCape-2L", "computer" : "BeagleBone", "url" : "/dev/ttyACM0", "max_freq" : 300,
+            "lines" : {
+                "PCIe-12v"        : { "number" : 0,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "PCIe-3.3v"       : { "number" : 1,  "voltage" : 3.3, "description" : "", "slope" : 71.4943627331, "offset" : 194.12 }
+            }
+        }
+
+    }
+}

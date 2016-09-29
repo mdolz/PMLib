@@ -35,14 +35,14 @@
 #include <utility>
 #include <condition_variable>
 //#include <boost/thread.hpp>
-#include <boost/coroutine/asymmetric_coroutine.hpp>
+//#include <boost/coroutine/asymmetric_coroutine.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 #ifdef USE_STXXL
     #include <stxxl/vector>
 #endif
 
 using namespace std;
-using namespace boost::coroutines;
+//using namespace boost::coroutines;
 using namespace boost::lockfree;
 
 namespace PMLib

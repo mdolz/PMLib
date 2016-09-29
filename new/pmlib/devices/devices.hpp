@@ -31,4 +31,9 @@
 #include "ArduPower.hpp" 
 #include "WattsUp.hpp"
 
+// Suport for AccelPower CAPE.
+#ifdef USE_DEVICE_APCAPE
+#include "APCape.hpp"
+#endif
+
 #endif

@@ -145,3 +145,15 @@ add_custom_target( uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/
 #    enable_testing()
 #    add_subdirectory( tests )
 #endif( BUILD_TESTS )
+
+## Plugins (experimental)
+option( USE_DEVICE_APCAPE "Build support for AccelPower CAPE" OFF)
+if ( USE_DEVICE_APCAPE )
+    add_definitions(-DUSE_DEVICE_APCAPE)
+    #add_subdirectory(pmlib/devices/APCape)
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
+    #include_directories(${STXXL_INCLUDE_DIRS})
+else()
+endif()
+
+
