@@ -77,9 +77,31 @@ void Device::deregister_counter(const Counter &c) {
     counter_lock.unlock();
 }
 
-void Device::register_line(string name, string description, int number, Computer &c, float voltage,
+void Device::register_line(string name, string description, string metric, int number, Computer &c, float voltage,
     float offset, float slope) {
-    lines[number] = make_shared<Line>(name, description, number, voltage, c, offset, slope);
+    // Map string metrics to enum.
+    std:map<std::string, Metric> avail_metrics 
+    {
+      { "voltage" , Metric::voltage },
+      { "shunt_voltage" , Metric::shunt_voltage },
+      { "current" , Metric::current },
+      { "power" , Metric::power },
+      { "temperature" , Metric::temperature },
+      { "default" , Metric::def }
+    };
+
+    Metric _metric;
+
+    try
+    {
+      _metric = avail_metrics.at( metric );
+    }
+    catch( out_of_range )
+    {
+      std::cout << "Unavailable metric" << std::endl;
+    }
+
+    lines[number] = make_shared<Line>(name, description, _metric, number, voltage, c, offset, slope);
 }
 
 void Device::push_back_data(vector<double> &sample) {

@@ -331,7 +331,24 @@ namespace PMLib
                 auto t1 = system_clock::now();
 
                 for( auto i = 0; i < n_lines; i++ )
-                  sample[i] = devs[i]->getPower_mW();
+                {
+                  Metric metric = get_lines().at(i)->get_metric();
+
+                  switch( metric )
+                  {
+                    case Metric::power:
+                      sample[i] = devs[i]->getPower_mW();
+                      break;
+                    case Metric::voltage:
+                      sample[i] = devs[i]->getBusVoltage_V();
+                      break;
+                    case Metric::current:
+                      sample[i] = devs[i]->getCurrent_mA();
+                      break;
+                    default:
+                      sample[i] = devs[i]->getPower_mW();
+                  }
+                }
 
                 yield( sample );
 
@@ -350,13 +367,13 @@ namespace PMLib
         } ) {};   
     };
 
-    static RegisterDevice< APCape< 1 > > Reg_APCape1L("APCape-1L");
-    static RegisterDevice< APCape< 2 > > Reg_APCape2L("APCape-2L");
-    static RegisterDevice< APCape< 3 > > Reg_APCape3L("APCape-3L");
-    static RegisterDevice< APCape< 4 > > Reg_APCape4L("APCape-4L");
-    static RegisterDevice< APCape< 5 > > Reg_APCape5L("APCape-5L");
-    static RegisterDevice< APCape< 6 > > Reg_APCape6L("APCape-6L");
-    static RegisterDevice< APCape< 7 > > Reg_APCape7L("APCape-7L");
+    //static RegisterDevice< APCape< 1 > > Reg_APCape1L("APCape-1L");
+    //static RegisterDevice< APCape< 2 > > Reg_APCape2L("APCape-2L");
+    //static RegisterDevice< APCape< 3 > > Reg_APCape3L("APCape-3L");
+    //static RegisterDevice< APCape< 4 > > Reg_APCape4L("APCape-4L");
+    //static RegisterDevice< APCape< 5 > > Reg_APCape5L("APCape-5L");
+    //static RegisterDevice< APCape< 6 > > Reg_APCape6L("APCape-6L");
+    //static RegisterDevice< APCape< 7 > > Reg_APCape7L("APCape-7L");
     static RegisterDevice< APCape< 8 > > Reg_APCape8L("APCape-8L");
 }
 

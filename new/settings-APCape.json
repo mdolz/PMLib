@@ -8,16 +8,16 @@
    	},
 
     "devices" : {
-	"APCape8L" : { "type" : "APCape-8L", "computer" : "BeagleBone", "url" : "/dev/ttyACM0", "max_freq" : 1200,
+	"APCape8L" : { "type" : "APCape-8L", "computer" : "BeagleBone", "url" : "/dev/i2c-2", "max_freq" : 1200,
             "lines" : {
-                "PCIe-12v"     : { "number" : 0,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
-                "PCIe-3.3"     : { "number" : 1,  "voltage" : 3.3, "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
-                "2x3-1"        : { "number" : 2,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
-                "2x3-2"        : { "number" : 3,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
-                "2x3-3"        : { "number" : 4,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
-                "2x4-1"        : { "number" : 5,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
-                "2x4-2"        : { "number" : 6,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
-                "2x4-3"        : { "number" : 7,  "voltage" : 12,  "description" : "", "slope" : 71.4943627331, "offset" : 194.12 }
+                "PCIe-12v"     : { "number" : 0,  "voltage" : 12,  "metric": "power", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "PCIe-3.3"     : { "number" : 1,  "voltage" : 3.3, "metric": "voltage", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "2x3-1"        : { "number" : 2,  "voltage" : 12,  "metric": "power", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "2x3-2"        : { "number" : 3,  "voltage" : 12,  "metric": "power", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "2x3-3"        : { "number" : 4,  "voltage" : 12,  "metric": "power", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "2x4-1"        : { "number" : 5,  "voltage" : 12,  "metric": "power", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "2x4-2"        : { "number" : 6,  "voltage" : 12,  "metric": "power", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 },
+                "2x4-3"        : { "number" : 7,  "voltage" : 12,  "metric": "power", "description" : "", "slope" : 71.4943627331, "offset" : 194.12 }
             }
         }
 

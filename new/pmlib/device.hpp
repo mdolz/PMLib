@@ -60,22 +60,26 @@ namespace PMLib
     typedef std::vector<double> vector_type;
 #endif
 
+    enum class Metric { voltage, shunt_voltage, current, power, temperature, def }; 
+
     struct Line {
         string _name, _description;
         int _id;
+        Metric _metric;
         float _voltage, _offset, _slope;
         std::atomic<int> _enabled, _active;
         Computer _computer;
         vector_type data;
 
         Line() {};
-        Line(string name, string desc, int number, float voltage, 
+        Line(string name, string desc, Metric metric, int number, float voltage, 
             Computer &comp, float offset = 0, float slope = 0) :
-            _name{name}, _description{desc}, _id{number}, 
+            _name{name}, _description{desc}, _metric{metric}, _id{number}, 
             _voltage{voltage}, _offset{offset}, _slope{slope}, 
             _enabled{0}, _active{0}, _computer{comp} {};
 
         inline int get_id() const { return _id; }
+        inline Metric get_metric() const { return _metric; }
         inline void enable() { atomic_fetch_add(&_enabled, 1); }
         inline void disable() { if (_enabled.load() > 0) atomic_fetch_sub(&_enabled, 1); else _enabled.store(0); }
         inline bool is_enabled() { return _enabled.load() > 0; }
@@ -148,7 +152,7 @@ namespace PMLib
         inline bool is_running() { return _running.load(); };
         inline bool has_counters() { return counter_map.size() > 0; };
 
-        void register_line(string name, string description, int number, Computer &c, float voltage, float offset = 0, float slope = 0);
+        void register_line(string name, string description, string metric, int number, Computer &c, float voltage, float offset = 0, float slope = 0);
         void get_lines_sizes(const vector<int> &sel_lines, set_t &length);
         void push_back_data(vector<double> &sample);
         const vector_type& get_line_data(int i);
