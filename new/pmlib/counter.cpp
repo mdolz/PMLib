@@ -249,7 +249,7 @@ void Counter::set_lines(string lines_str) {
     lines.clear();
     for (int i = 0; i < lines_str.length(); i++) {
         for ( int b = 0; b < 8; b++ ) { 
-            int l = i*b + b;
+            int l = i*8 + b;
             if ( lines_str[i] & (1 << b) && 
                  l >= 0 && l < dev->get_num_lines() ) 
                 lines.push_back( l );
