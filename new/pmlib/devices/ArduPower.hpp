@@ -27,24 +27,33 @@
 #ifndef ARDUPOWER_HPP
 #define ARDUPOWER_HPP
 
+/// @file ArduPower.hpp
+/// @brief Driver for ArduPower, an Arduino-based multi-outlet power
+///        distribution unit (16 lines, see new/settings.json for real
+///        calibration slope/offset values). The sampling loop below is
+///        currently a stub that increments a single sample rather than
+///        reading the Arduino's serial protocol, pending hardware access
+///        to implement and validate the real read.
+
 namespace PMLib
 {
     template <int n_lines = 16, int max_freq = 1000, bool pdu = false>
     class ArduPower : public Device {
       public:
         ArduPower(string name, string url) :
-            Device(name, url, max_freq, n_lines, pdu, 
+            Device(name, url, max_freq, n_lines, pdu,
             [&] () {
 
-            while ( is_running() ){ 
+            while ( is_running() ){
                 sample[0]++;
                 yield( sample );
-                this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
+                this_thread::sleep_for(std::chrono::microseconds((int)(1e6/max_freq)));
             }
 
-        } ) {};   
+        } ) {};
     };
 
+    /// Registers the JSON config "type": "ArduPower".
     static RegisterDevice< ArduPower<> > Reg_ArduPower("ArduPower");
 }
 

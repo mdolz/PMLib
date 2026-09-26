@@ -35,9 +35,25 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
+// libi2c-dev's smbus.h declares plain C symbols but lacks an extern "C"
+// guard, so a C++ translation unit would otherwise link against mangled
+// names that don't exist in libi2c.so.
+extern "C" {
+#include <i2c/smbus.h>
+}
 
 using namespace std::chrono;
 
+/// @file APCape.hpp
+/// @brief Driver for the experimental AccelPower CAPE (APCape), an 8-line
+///        BeagleBone I2C capelet built around TI INA219 current/power
+///        monitors. Only built when USE_DEVICE_APCAPE is enabled (see
+///        CMakeLists.txt) and requires Linux I2C support at runtime, so it
+///        is kept optional and out of the default build.
+
+/// Minimal register-level driver for one TI INA219 current/shunt-voltage
+/// monitor over Linux I2C (see the INA219 datasheet for register layout).
+/// APCape instantiates one of these per line, each at its own I2C address.
 class INA219
 {
   private:
@@ -129,6 +145,8 @@ class INA219
       float currentDivider_mA;
       float powerDivider_mW;
 
+      // INA219 raw registers are two's-complement; converts the 16-bit
+      // raw value read off the bus to a signed int before scaling.
       int twosToInt( int val, int len )
       {
         if( val & ( 1 << len - 1 ))
@@ -157,6 +175,11 @@ class INA219
           std::cout << "Error closing device" << std::endl;
       }
 
+      // Programs the INA219's calibration register for its 32V/4.5A range
+      // and configures continuous bus+shunt voltage sampling at 12-bit
+      // resolution. The divider constants below match this specific
+      // calibration (see the INA219 datasheet's calibration formula) and
+      // must be kept in sync if the range is ever changed.
       void setCalibration_32V_4_5A( void )
       {
         currentDivider_mA = 7.142857;
@@ -317,9 +340,11 @@ namespace PMLib
     class APCape : public Device {
       public:
         APCape(string name, string url) :
-            Device(name, url, max_freq, n_lines, pdu, 
+            Device(name, url, max_freq, n_lines, pdu,
             [&] () {
 
+            // Fixed I2C addresses of the 8 INA219 monitors on the APCape
+            // board, each wired to /dev/i2c-2.
             int addr[8] = { 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47 };
 
             std::vector<std::unique_ptr<INA219>> devs;
@@ -330,6 +355,10 @@ namespace PMLib
             while ( is_running() ){ 
                 auto t1 = system_clock::now();
 
+                // Each line independently selects which INA219 register it
+                // reports (as configured via the config file's per-line
+                // "metric"), so the same 8-channel board can mix
+                // power/voltage/current lines.
                 for( auto i = 0; i < n_lines; i++ )
                 {
                   Metric metric = get_lines().at(i)->get_metric();
@@ -360,13 +389,15 @@ namespace PMLib
 		if( dms.count() < (int)(1e6/max_freq) )
                 {
                   //std::cout << "Will sleep: " << (int)(1e6/max_freq) - dms.count() << " microseconds" << std::endl;
-                  this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq) - dms.count()));
+                  this_thread::sleep_for(std::chrono::microseconds((int)(1e6/max_freq) - dms.count()));
                 }
             }
 
         } ) {};   
     };
 
+    // Only the full 8-line board is currently registered; smaller variants
+    // are left commented out below for boards populated with fewer INA219s.
     //static RegisterDevice< APCape< 1 > > Reg_APCape1L("APCape-1L");
     //static RegisterDevice< APCape< 2 > > Reg_APCape2L("APCape-2L");
     //static RegisterDevice< APCape< 3 > > Reg_APCape3L("APCape-3L");
@@ -374,6 +405,7 @@ namespace PMLib
     //static RegisterDevice< APCape< 5 > > Reg_APCape5L("APCape-5L");
     //static RegisterDevice< APCape< 6 > > Reg_APCape6L("APCape-6L");
     //static RegisterDevice< APCape< 7 > > Reg_APCape7L("APCape-7L");
+    /// Registers the JSON config "type": "APCape-8L".
     static RegisterDevice< APCape< 8 > > Reg_APCape8L("APCape-8L");
 }
 

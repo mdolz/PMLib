@@ -35,6 +35,10 @@
 #include <unistd.h>
 #include "logger.hpp"
 
+/// @file daemonize.hpp
+/// @brief Classic double-fork UNIX daemonization, used when pmlib_server is
+///        started with --daemonize.
+
 using namespace std;
 using namespace PMLib;
 
@@ -59,10 +63,15 @@ namespace PMLib {
         }
     }    
  
+    /// Forks the process into the background twice (the standard technique
+    /// to detach from the controlling terminal and prevent ever reacquiring
+    /// one), redirects stdio to /dev/null and a log file, and writes @p
+    /// pidfile. Returns 0 on success; each fork'd parent exits immediately.
     int daemonize(string pidfile)
     {
         try {
 
+            // Already a daemon (reparented to init) - nothing to do.
             if (getppid() == 1) return -1;
 
             struct sigaction newSigAction;

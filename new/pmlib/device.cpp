@@ -31,9 +31,13 @@
 #include <boost/thread.hpp>
 
 #include "device.hpp"
-#include "server.hpp" 
+#include "server.hpp"
 #include "counter.hpp"
 #include "utils/logger.hpp"
+
+/// @file device.cpp
+/// @brief Device implementation. See device.hpp for the class-level
+///        documentation.
 
 namespace PMLib {
 
@@ -149,7 +153,11 @@ void Device::stop() {
 }
 
 void Device::run() {
-    
+
+    // Refuses to start a device whose config didn't declare all of its
+    // lines: Server::start_devices() is waiting on start_cv and treats a
+    // timeout/no-notify as a startup failure, so this notifies immediately
+    // to fail fast instead of hanging for the full 15s wait.
     if (lines.size() < _n_lines) {
         start_cv.notify_all();
         return;
@@ -178,8 +186,11 @@ void Device::run() {
 
     } );
 */
+    // Producer: the concrete driver's sampling loop (e.g. WattsUp/LMG's
+    // serial read, or the stub increment used when hardware isn't wired
+    // up), pushing samples into data_queue via yield().
     std::thread read_thr( [&] () {
-        try { 
+        try {
             _readf();
         }
         catch (std::exception& e) {
@@ -188,19 +199,22 @@ void Device::run() {
         }
     } );
 
+    // Consumer: drains data_queue into per-line storage. Only flips
+    // _working (unblocking Server::start_devices()) once the first sample
+    // has actually arrived, confirming the driver is really producing data.
     while ( is_running() ) {
         while( !data_queue.empty() && is_running() ) {
             while( !data_queue.pop( _sample ) );
             push_back_data(_sample);
-//            avg_queue.push( _sample ); 
-           // for ( auto &v: sample_) cout << v << " "; cout << endl;        
+//            avg_queue.push( _sample );
+           // for ( auto &v: sample_) cout << v << " "; cout << endl;
             if ( !is_working() ) {
                 _working.store(true);
                 start_cv.notify_all();
             }
         }
         // This is important as it avoids a full busy-wait loop!
-        this_thread::sleep_for(chrono::microseconds((int)(1e6/_max_frequency)));
+        this_thread::sleep_for(std::chrono::microseconds((int)(1e6/_max_frequency)));
     }
 
 //    avg_thr.join();
