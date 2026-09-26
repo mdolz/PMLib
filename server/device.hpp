@@ -91,8 +91,8 @@ namespace PMLib
         Line() {};
         Line(string name, string desc, Metric metric, int number, float voltage, 
             Computer &comp, float offset = 0, float slope = 0) :
-            _name{name}, _description{desc}, _metric{metric}, _id{number}, 
-            _voltage{voltage}, _offset{offset}, _slope{slope}, 
+            _name{name}, _description{desc}, _id{number}, _metric{metric},
+            _voltage{voltage}, _offset{offset}, _slope{slope},
             _enabled{0}, _active{0}, _computer{comp} {};
 
         inline int get_id() const { return _id; }
