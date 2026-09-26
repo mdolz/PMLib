@@ -58,15 +58,19 @@ PMLib/
 │                       (the actively maintained C++17 implementation)
 ├── third_party/stxxl/  Vendored STXXL, used for on-disk sample storage
 ├── examples/           Example JSON server configurations
-├── legacy/             Legacy Python2/C client-server implementation
-│   ├── client/         C client API (pmlib.h) predating the C++ rewrite
-│   └── server/         Python daemon with additional device backends
-│                       (IPMI, National Instruments, PDU, DC/DC2)
+├── client/             C client API (pmlib.h) applications link against
+│                       to talk to pmlib_server — still actively used
+├── legacy/             Deprecated Python2 server daemon, predates src/
+│   └── daemon/         (adds IPMI, National Instruments, PDU, DC/DC2
+│                       device backends not ported to src/)
 └── docs/               Doxygen output and static assets (logo, ...)
 ```
 
-The `legacy/` tree is kept for reference and predates the C++ rewrite in
-`src/`; it is not actively developed but is left untouched.
+`client/` is the one client API PMLib has and is still how applications
+talk to `pmlib_server`, whether it's the modern C++ server in `src/` or
+the legacy one in `legacy/`. `legacy/` itself is only the old Python
+server daemon: it predates the C++ rewrite in `src/` and is kept for
+reference, but is not actively developed.
 
 ## Supported devices
 
@@ -76,7 +80,7 @@ The `legacy/` tree is kept for reference and predates the C++ rewrite in
 | ZES Zimmer LMG450 | Supported | `src/devices/LMG.hpp` |
 | ArduPower (Arduino-based PDU) | Supported | `src/devices/ArduPower.hpp` |
 | APCape / AccelPower CAPE | Experimental (`USE_DEVICE_APCAPE`) | `src/devices/APCape.hpp` |
-| IPMI, National Instruments, generic PDU, DC/DC2 | Legacy only | `legacy/server/daemon/devices/` |
+| IPMI, National Instruments, generic PDU, DC/DC2 | Legacy only | `legacy/daemon/devices/` |
 
 ## Building
 
@@ -116,9 +120,9 @@ experimental APCape device.
 ## Client usage example
 
 Clients talk to `pmlib_server` over TCP using the C API declared in
-[`legacy/client/pmlib.h`](legacy/client/pmlib.h). A minimal client looks
-like this (see [`legacy/client/test/example1.c`](legacy/client/test/example1.c)
-for a runnable version):
+[`client/pmlib.h`](client/pmlib.h). A minimal client looks like this (see
+[`client/test/example1.c`](client/test/example1.c) for a runnable
+version):
 
 ```c
 #include "pmlib.h"
@@ -165,7 +169,7 @@ If you use PMLib in academic work, please cite:
 ## Contributing
 
 Issues and pull requests are welcome. When contributing to the hardware
-device drivers under `src/devices/` or `legacy/server/daemon/devices/`,
+device drivers under `src/devices/` or `legacy/daemon/devices/`,
 please note in the PR description which physical device you tested against,
 since these cannot be exercised in CI.
 
