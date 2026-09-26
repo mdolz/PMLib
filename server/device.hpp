@@ -57,7 +57,7 @@ namespace PMLib
     struct Computer {
         string _name, _ip;
 
-        Computer() : _name{"Unkwon"}, _ip{"0.0.0.0"} {};
+        Computer() : _name{"Unknown"}, _ip{"0.0.0.0"} {};
         Computer(std::string name, std::string ip) : _name{name}, _ip{ip} {};
     };
 
