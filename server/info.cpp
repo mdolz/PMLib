@@ -46,6 +46,10 @@ Info::Info(socket_ptr sock, Operation op, Server* server) :
 }
 
 void Info::list_devices() {
+    // The client (see client/pm_get_devices.c's documented protocol) reads
+    // the device count before looping to read each name; omitting it here
+    // left every client call desynchronized from the very first reply.
+    send<int>(_sock, (int)_server->device_map.size());
     for (auto &dev : _server->device_map)
         send(_sock, dev.second->get_name());
 }
