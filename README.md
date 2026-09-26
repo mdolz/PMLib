@@ -39,7 +39,7 @@ PMLib follows a **client/server** model over TCP:
 ```
  ┌──────────────┐ JSON config ┌─────────────────────────┐
  │ pmlib_server │────────────▶│  devices (WattsUp, LMG, │
- │ (new/pmlib)  │             │ ArduPower, APCape, ...) │
+ │  (server/)   │             │ ArduPower, APCape, ...) │
  └───────┬──────┘             └─────────────────────────┘
          │ TCP
          ▼
@@ -53,30 +53,36 @@ PMLib follows a **client/server** model over TCP:
 
 ```
 PMLib/
-├── new/            Modern C++17 rewrite of the server (actively maintained)
-│   ├── pmlib/      Server, counter, device and device-driver sources
-│   ├── stxxl/       Vendored STXXL, used for on-disk sample storage
-│   └── CMakeLists.txt
-└── Python/         Legacy Python2/C client-server implementation
-    ├── client/      C client API (pmlib.h) predating the C++ rewrite
-    └── server/      Python daemon with additional device backends
-                      (IPMI, National Instruments, PDU, DC/DC2)
+├── CMakeLists.txt
+├── server/             Server, counter, device and device-driver sources
+│                       (the actively maintained C++17 implementation)
+├── third_party/stxxl/  Vendored STXXL, used for on-disk sample storage
+├── examples/           Example JSON server configurations
+├── client/             C client API (pmlib.h) applications link against
+│                       to talk to pmlib_server — still actively used
+├── legacy/             Deprecated Python2 server daemon, predates server/
+│   └── daemon/         (adds IPMI, National Instruments, PDU, DC/DC2
+│                       device backends not ported to server/)
+└── docs/               Doxygen output and static assets (logo, ...)
 ```
 
-The `Python/` tree is kept for reference and predates the `new/` C++
-rewrite; it is not actively developed but is left untouched.
+`client/` is the one client API PMLib has and is still how applications
+talk to `pmlib_server`, whether it's the modern C++ server in `server/` or
+the legacy one in `legacy/`. `legacy/` itself is only the old Python
+server daemon: it predates the C++ rewrite in `server/` and is kept for
+reference, but is not actively developed.
 
 ## Supported devices
 
 | Device | Status | Implementation |
 |---|---|---|
-| WattsUp? Pro | Supported | `new/pmlib/devices/WattsUp.hpp` |
-| ZES Zimmer LMG450 | Supported | `new/pmlib/devices/LMG.hpp` |
-| ArduPower (Arduino-based PDU) | Supported | `new/pmlib/devices/ArduPower.hpp` |
-| APCape / AccelPower CAPE | Experimental (`USE_DEVICE_APCAPE`) | `new/pmlib/devices/APCape.hpp` |
-| IPMI, National Instruments, generic PDU, DC/DC2 | Legacy only | `Python/server/daemon/devices/` |
+| WattsUp? Pro | Supported | `server/devices/WattsUp.hpp` |
+| ZES Zimmer LMG450 | Supported | `server/devices/LMG.hpp` |
+| ArduPower (Arduino-based PDU) | Supported | `server/devices/ArduPower.hpp` |
+| APCape / AccelPower CAPE | Experimental (`USE_DEVICE_APCAPE`) | `server/devices/APCape.hpp` |
+| IPMI, National Instruments, generic PDU, DC/DC2 | Legacy only | `legacy/daemon/devices/` |
 
-## Building (new/ C++ server)
+## Building
 
 ### Requirements
 
@@ -85,27 +91,25 @@ rewrite; it is not actively developed but is left untouched.
 - Boost ≥ 1.36 (`system`, `filesystem`, `thread`, `coroutine`, `log`, `log_setup`)
 
 ```bash
-cd new
-mkdir build && cd build
-cmake ..
-make -j
+cmake -S . -B build
+cmake --build build -j
 ```
 
-This produces the `pmlib_server` binary. To build with experimental
-AccelPower CAPE support:
+This produces `build/pmlib_server`. To build with experimental AccelPower
+CAPE support:
 
 ```bash
-cmake .. -DUSE_DEVICE_APCAPE=ON
+cmake -S . -B build -DUSE_DEVICE_APCAPE=ON
 ```
 
 ### Configuring
 
 The server reads a JSON configuration file describing the machine IP/port to
 listen on, the computers being monitored, and the devices/lines attached to
-them. See [`new/settings.json`](new/settings.json) for a complete example
-covering WattsUp, LMG450 and ArduPower devices, and
-[`new/settings-APCape.json`](new/settings-APCape.json) for the experimental
-APCape device.
+them. See [`examples/settings.json`](examples/settings.json) for a complete
+example covering WattsUp, LMG450 and ArduPower devices, and
+[`examples/settings-APCape.json`](examples/settings-APCape.json) for the
+experimental APCape device.
 
 ```bash
 ./pmlib_server --configfile /path/to/settings.json
@@ -116,9 +120,9 @@ APCape device.
 ## Client usage example
 
 Clients talk to `pmlib_server` over TCP using the C API declared in
-[`Python/client/pmlib.h`](Python/client/pmlib.h). A minimal client looks
-like this (see [`Python/client/test/example1.c`](Python/client/test/example1.c)
-for a runnable version):
+[`client/pmlib.h`](client/pmlib.h). A minimal client looks like this (see
+[`client/test/example1.c`](client/test/example1.c) for a runnable
+version):
 
 ```c
 #include "pmlib.h"
@@ -143,7 +147,7 @@ pm_print_data_csv("region1.csv", counter, lines, /*set=*/0);
 
 ## Documentation
 
-API reference for the `new/pmlib` C++ sources is generated with
+API reference for the `server/` C++ sources is generated with
 [Doxygen](https://www.doxygen.nl/):
 
 ```bash
@@ -165,7 +169,7 @@ If you use PMLib in academic work, please cite:
 ## Contributing
 
 Issues and pull requests are welcome. When contributing to the hardware
-device drivers under `new/pmlib/devices/` or `Python/server/daemon/devices/`,
+device drivers under `server/devices/` or `legacy/daemon/devices/`,
 please note in the PR description which physical device you tested against,
 since these cannot be exercised in CI.
 

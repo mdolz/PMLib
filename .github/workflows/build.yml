@@ -37,7 +37,7 @@ jobs:
             libi2c-dev
 
       - name: Configure
-        run: cmake -S new -B new/build ${{ matrix.cmake_args }}
+        run: cmake -S . -B build ${{ matrix.cmake_args }}
 
       - name: Build
-        run: cmake --build new/build -j"$(nproc)"
+        run: cmake --build build -j"$(nproc)"

@@ -21,13 +21,13 @@ find_package(Boost 1.36.0 REQUIRED COMPONENTS system filesystem thread coroutine
 
 set(USE_STXXL ON CACHE BOOL "Use STXXL for on-disk sample storage")
 if(USE_STXXL)
-    add_subdirectory(stxxl)
+    add_subdirectory(third_party/stxxl)
 endif()
 
 ## Plugins (experimental)
 option(USE_DEVICE_APCAPE "Build support for AccelPower CAPE" OFF)
 
-set(PMLIB ${PROJECT_SOURCE_DIR}/pmlib)
+set(PMLIB ${PROJECT_SOURCE_DIR}/server)
 
 set(PMLIBHEADERS
     ${PMLIB}/server.hpp
