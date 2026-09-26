@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/pmlib-logo.svg" alt="PMLib logo" width="140">
+  <img src="docs/img/pmlib-logo.png" alt="PMLib logo" width="140">
 </p>
 
 <h1 align="center">PMLib</h1>
