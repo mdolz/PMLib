@@ -76,11 +76,23 @@ reference, but is not actively developed.
 
 | Device | Status | Implementation |
 |---|---|---|
-| WattsUp? Pro | Supported | `server/devices/WattsUp.hpp` |
-| ZES Zimmer LMG450 | Supported | `server/devices/LMG.hpp` |
-| ArduPower (Arduino-based PDU) | Supported | `server/devices/ArduPower.hpp` |
-| APCape / AccelPower CAPE | Experimental (`USE_DEVICE_APCAPE`) | `server/devices/APCape.hpp` |
-| IPMI, National Instruments, generic PDU, DC/DC2 | Legacy only | `legacy/daemon/devices/` |
+| WattsUp? Pro | Ported from the Python reference, **not yet validated against real hardware** | `server/devices/WattsUp.hpp` |
+| ZES Zimmer LMG450 | Ported from the Python reference, **not yet validated against real hardware** | `server/devices/LMG.hpp` |
+| ZES Zimmer LMG500 | Same protocol extrapolated to 8 lines; no Python reference exists, **unverified** | `server/devices/LMG.hpp` |
+| Dummy (fake, no hardware) | Supported — useful for testing the client/server pipeline without a meter | `server/devices/Dummy.hpp` |
+| APCape / AccelPower CAPE | Experimental (`USE_DEVICE_APCAPE`), untested | `server/devices/APCape.hpp` |
+| ArduPower (Arduino-based PDU) | Not yet ported — sampling loop is still a stub | `server/devices/ArduPower.hpp` |
+| DC2 (custom serial power meter) | Not yet ported | `legacy/daemon/devices/DC2Device.py` only |
+| IPMI, National Instruments, generic PDU | Legacy only, not ported | `legacy/daemon/devices/` |
+
+WattsUp and LMG450 were ported line-for-line from their working Python
+implementations (serial settings, command sequences and reply parsing);
+LMG500 extends the same protocol to more channels without a known-working
+reference to check it against. None of the three have been run against
+physical hardware as part of this port — please validate before trusting
+their readings. ArduPower's protocol (a custom bit-packed serial frame) and
+DC2's are meaningfully more complex and were intentionally left for a
+follow-up pass rather than ported without a way to verify them.
 
 ## Building
 

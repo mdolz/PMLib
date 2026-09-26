@@ -18,5 +18,7 @@ docs/latex/
 # Misc
 nohup.out
 *.log
+*.errlog
 *.pid
+data.tmp
 .DS_Store

@@ -37,6 +37,7 @@
 #include "LMG.hpp"
 #include "ArduPower.hpp"
 #include "WattsUp.hpp"
+#include "Dummy.hpp"
 
 // Suport for AccelPower CAPE.
 #ifdef USE_DEVICE_APCAPE
