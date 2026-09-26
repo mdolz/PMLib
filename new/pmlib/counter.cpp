@@ -45,6 +45,10 @@
 #include "counter.hpp"
 #include "utils/logger.hpp"
 
+/// @file counter.cpp
+/// @brief Counter implementation. See counter.hpp for the class-level
+///        documentation.
+
 namespace PMLib {
 
 int Counter::nextid = 0;
@@ -157,25 +161,32 @@ void Counter::stop() {
 
 void Counter::get() {
     if ( status == State::INACTIVE ) {
-        
+
         vector<int> watts_sets(1, 0);
         vector<long long int> min_len(sets.size(), 0);
         vector<double> watts;
         int se_idx = 0;
-        
+
+        // For each recorded set, the usable output length is the shortest
+        // resampled line (lines can have accumulated slightly different
+        // buffer offsets by the time stop() ran), so every line contributes
+        // the same number of samples to the reply.
         for ( auto &se : sets ) {
             for ( auto &l : lines ) {
-                min_len[ se_idx ] = ( l == lines.front() ) ? 
+                min_len[ se_idx ] = ( l == lines.front() ) ?
                                     ceil( ( se.second.get()[l] - se.first[l] ) / interval) :
                                     min( (long long)ceil( ( ( se.second.get()[l] - se.first[l] ) / interval ) ), min_len[ se_idx ] );
             }
-        
+
             watts_sets.push_back( min_len[se_idx] + watts_sets.back() );
             se_idx++;
         }
        // cout << "MIN_LEN: [ "; for(auto &i:min_len) cout << i << " "; cout << "]" << endl;
        // cout << "WATTS_SETS: [ "; for(auto &i:watts_sets) cout << i << " "; cout << "]" << endl;
 
+        // Aggregate mode sums all requested lines into one series per set
+        // (e.g. total power across several outlets); non-aggregate mode
+        // keeps each line's samples separate, interleaved set by set.
         if ( aggregate ) {
             se_idx = 0;
             for ( auto &se : sets ) {

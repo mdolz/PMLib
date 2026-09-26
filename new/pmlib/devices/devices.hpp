@@ -27,8 +27,15 @@
 #ifndef DEVICES_LIST_HPP
 #define DEVICES_LIST_HPP
 
+/// @file devices.hpp
+/// @brief Aggregates every built-in device driver so pmlib_server.cpp only
+///        needs one include. Each header below self-registers its
+///        device type(s) with Device::create_device() via a file-scope
+///        RegisterDevice instance; adding a new driver here is enough to
+///        make it available from the JSON config's "type" field.
+
 #include "LMG.hpp"
-#include "ArduPower.hpp" 
+#include "ArduPower.hpp"
 #include "WattsUp.hpp"
 
 // Suport for AccelPower CAPE.

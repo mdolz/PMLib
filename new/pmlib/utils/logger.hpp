@@ -32,6 +32,12 @@
 #include <boost/log/sources/global_logger_storage.hpp>
 #include <boost/log/trivial.hpp>
 
+/// @file logger.hpp
+/// @brief Process-wide, thread-safe severity logger. Sinks/formatting are
+///        configured in Server::parse_configfile() from the JSON config's
+///        "server_logfile"; the CLOG_* macros below are the only way the
+///        rest of the codebase should write to it.
+
 #define CLOG_INFO  BOOST_LOG_SEV(lg::get(), trivial::info)
 #define CLOG_WARN  BOOST_LOG_SEV(lg::get(), trivial::warning)
 #define CLOG_ERROR BOOST_LOG_SEV(lg::get(), trivial::error)
@@ -40,9 +46,11 @@ using namespace boost::log;
 
 namespace PMLib {
 
+    // Declares the global logger instance `lg`, safely shareable across the
+    // per-connection and per-device threads that all log concurrently.
     typedef sources::severity_logger_mt<trivial::severity_level> logger_t;
     BOOST_LOG_GLOBAL_LOGGER(lg, logger_t);
-   
+
 }
 
 #endif
