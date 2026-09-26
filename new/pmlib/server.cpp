@@ -69,7 +69,11 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(lg, logger_t) {
     return logger_type();
 }
 
-Server::Server(boost::asio::io_service* ios, string configfile, bool daemonize) : 
+/// @file server.cpp
+/// @brief Server implementation: config parsing, device lifecycle and the
+///        accept loop. See server.hpp for the class-level documentation.
+
+Server::Server(boost::asio::io_service* ios, string configfile, bool daemonize) :
     _io_service{ios}, _acceptor{*ios}, _daemonize{daemonize} {
     parse_configfile(configfile);
 }
@@ -118,6 +122,10 @@ void Server::async_accept() {
 void Server::accept_handler(socket_ptr _sock, const boost::system::error_code& e) {
     if ( !e ) {
         try {
+            // Each connection blocks its handling thread for as long as the
+            // client's Counter/Info session lasts (see connection()), so it
+            // runs detached on its own thread rather than on the io_service
+            // thread, which must stay free to keep accepting.
             boost::thread(boost::bind( &Server::connection, this, _sock));
             //thread( &Server::connection, this, _sock);
         }
@@ -136,7 +144,7 @@ void Server::start_devices() {
             d.second->start();
 
             unique_lock<mutex> lk(d.second->start_mutex);
-            d.second->start_cv.wait_for(lk, chrono::seconds(15) );
+            d.second->start_cv.wait_for(lk, std::chrono::seconds(15) );
 
             if ( d.second->is_working() )
                 cout << green << "[  OK  ]" << def << endl << flush;
@@ -162,7 +170,7 @@ void Server::stop_devices() {
                 d.second->stop();
 
                 unique_lock<mutex> lk(d.second->stop_mutex);
-                d.second->stop_cv.wait_for(lk, chrono::seconds(15) );
+                d.second->stop_cv.wait_for(lk, std::chrono::seconds(15) );
 
                 if ( !d.second->is_running() )
                     cout << green << "[  OK  ]" << def << endl << flush;
@@ -302,6 +310,9 @@ void Server::parse_configfile(string config_filename) {
                               computers_map.find( d["computer"].asString() ) == computers_map.end() ) ) ? 
                               Computer() : computers_map[ d["computer"].asString() ];
 
+            // Verifies the device's "lines" object assigns each "number"
+            // exactly once in [0, line_count), catching config typos
+            // (duplicate/out-of-range line numbers) before the server starts.
             vector<bool> check_lines(lines.getMemberNames().size(), false);
 
             for( auto &ln : lines.getMemberNames() ) {

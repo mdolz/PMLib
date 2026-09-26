@@ -31,16 +31,25 @@
 
 using namespace boost::asio;
 
+/// @file WattsUp.hpp
+/// @brief Driver for the WattsUp? Pro power meter (single line, 1 Hz).
+///        The serial-port protocol implementation below is commented out
+///        pending hardware validation; the active sampling loop is a stub
+///        that fabricates increasing values so the device/Counter pipeline
+///        can be exercised without physical hardware attached.
+
 namespace PMLib
 {
     template <int n_lines = 1, int max_freq = 1, bool pdu = false>
     class WattsUp : public Device {
       public:
         WattsUp(string name, string url) :
-            Device(name, url, max_freq, n_lines, pdu, 
+            Device(name, url, max_freq, n_lines, pdu,
             [&] () {
                 /*
-                // Experimental code
+                // Experimental code: real WattsUp serial protocol (untested
+                // on hardware, kept for reference/completion by whoever has
+                // a device to validate against).
                 io_service io;
                 serial_port port( io, url );
 
@@ -79,16 +88,19 @@ namespace PMLib
                 io.stop();
                 */
 
-                while ( is_running() ) { 
+                // Stub sampling loop (no serial hardware read yet): see
+                // file-level comment above.
+                while ( is_running() ) {
                     sample[0] += 1;
 
                     yield( sample );
-                    this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
-                } 
+                    this_thread::sleep_for(std::chrono::microseconds((int)(1e6/max_freq)));
+                }
 
-            } ) {};   
+            } ) {};
     };
 
+    /// Registers the JSON config "type": "WattsUp".
     static RegisterDevice< WattsUp<> > Reg_WattsUp("WattsUp");
 }
 

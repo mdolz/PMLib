@@ -1,0 +1,22 @@
+# Build output
+build/
+build-*/
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+
+# Python
+*.pyc
+__pycache__/
+
+# Doxygen output
+docs/html/
+docs/latex/
+
+# Misc
+nohup.out
+*.log
+*.pid
+.DS_Store
