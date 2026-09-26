@@ -2,7 +2,6 @@
   <img src="docs/img/pmlib-logo.png" alt="PMLib logo" width="140">
 </p>
 
-<h1 align="center">PMLib</h1>
 <p align="center"><b>Power Measurement Library</b></p>
 
 <p align="center">
@@ -38,16 +37,17 @@ PMLib follows a **client/server** model over TCP:
   supporting several concurrent counters against the same device.
 
 ```
- ┌──────────────┐        JSON config         ┌────────────────────────┐
- │ pmlib_server │ ─────────────────────────▶ │ devices (WattsUp, LMG,  │
- │  (new/pmlib) │                             │ ArduPower, APCape, ...) │
- └──────┬───────┘                             └────────────────────────┘
-        │ TCP
-        ▼
- ┌──────────────┐
- │ client app   │  pm_set_server / pm_create_counter / pm_start_counter
- │ (your code)  │  pm_stop_counter / pm_get_counter_data / pm_print_data_csv
- └──────────────┘
+ ┌──────────────┐             ┌─────────────────────────┐
+                  JSON config
+ │ pmlib_server │────────────▶│  devices (WattsUp, LMG, │
+ │ (new/pmlib)  │             │ ArduPower, APCape, ...) │
+ └───────┬──────┘             └─────────────────────────┘
+         │ TCP
+         ▼
+ ┌─────────────┐
+ │  client app │  pm_set_server / pm_create_counter / pm_start_counter
+ │ (your code) │  pm_stop_counter / pm_get_counter_data / pm_print_data_csv
+ └─────────────┘
 ```
 
 ## Repository layout
