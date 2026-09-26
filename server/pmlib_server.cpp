@@ -43,7 +43,6 @@ void printUsage(const std::string & progName){
 
 int main(int argc, char *argv[]) {
 
-    int all = 0;
     int daemonize = false; //verbose;
     string configfile = "";
 

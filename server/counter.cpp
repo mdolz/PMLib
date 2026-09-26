@@ -215,12 +215,11 @@ void Counter::get() {
                   //  cout << "    RANGE: [ " << se.first[l] << ", " << 
                   //  min( min(se.second.get()[l], se.first[l]+min_len[se_idx]), (long long) line.size()) << " ] "<<endl;
 
-                    int before= watts.size();
                     int i = 0;
                     copy_if( line.begin() + se.first[l],
                              line.begin() + min( min(se.second.get()[l], se.first[l]+min_len[se_idx]), (long long) line.size()),
-                             back_inserter(watts), 
-                             [&i, this](int value){ return (i++ % interval) == 0; } );
+                             back_inserter(watts),
+                             [&i, this](int){ return (i++ % interval) == 0; } );
                   //  cout << "  WATTS DATA: "; cout << watts.size()-before << endl; for ( auto &d:watts) cout << d << " "; cout << endl;
                 }
              //   cout << endl;
