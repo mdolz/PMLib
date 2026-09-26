@@ -31,16 +31,25 @@
 
 using namespace boost::asio;
 
+/// @file LMG.hpp
+/// @brief Driver for the ZES Zimmer LMG450/LMG500 power analyzer, used as a
+///        multi-outlet (PDU-style) device. The SCPI-over-serial protocol
+///        implementation below is commented out pending hardware
+///        validation; the active sampling loop is a stub that fabricates
+///        increasing per-line values.
+
 namespace PMLib
 {
     template <int n_lines = 4, int max_freq = 20, bool pdu = true>
     class LMG : public Device {
       public:
         LMG(string name, string url) :
-            Device(name, url, max_freq, n_lines, pdu, 
+            Device(name, url, max_freq, n_lines, pdu,
             [&] () {
                 /*
-                // Experimental code
+                // Experimental code: real LMG SCPI protocol (untested on
+                // hardware, kept for reference/completion by whoever has a
+                // device to validate against).
                 io_service io;
                 serial_port port( io, url );
 
@@ -87,18 +96,22 @@ namespace PMLib
                 io.stop();
                 */
 
-                while ( is_running() ) { 
+                // Stub sampling loop (no serial hardware read yet): see
+                // file-level comment above.
+                while ( is_running() ) {
                     sample[0] += 0.01;
                     sample[1] += 0.02;
                     sample[2] += 0.01;
                     sample[3] += 0.03;
 
                     yield( sample );
-                    this_thread::sleep_for(chrono::microseconds((int)(1e6/max_freq)));
-                }    
-        } ) {};   
+                    this_thread::sleep_for(std::chrono::microseconds((int)(1e6/max_freq)));
+                }
+        } ) {};
     };
 
+    /// Registers the JSON config "type": "LMG450" (4 lines) and
+    /// "LMG500" (8 lines).
     static RegisterDevice< LMG< 4 > > Reg_LMG450("LMG450");
     static RegisterDevice< LMG< 8 > > Reg_LMG500("LMG500");
 }

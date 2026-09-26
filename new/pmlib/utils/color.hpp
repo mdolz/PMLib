@@ -29,6 +29,10 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
+/// @file color.hpp
+/// @brief ANSI terminal color codes used by Server's startup/shutdown
+///        progress messages (see server.cpp's "[  OK  ]"/"[FAILED]" lines).
+
 namespace Color {
     enum Code {
         FG_RED      = 31,

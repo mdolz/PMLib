@@ -1,0 +1,28 @@
+# Minimal Doxygen configuration for PMLib's new/ C++ rewrite.
+# Run `doxygen Doxyfile` from the repository root; HTML output is written
+# to docs/html/index.html. Unset options fall back to Doxygen's defaults.
+
+PROJECT_NAME           = "PMLib"
+PROJECT_BRIEF           = "Power Measurement Library"
+PROJECT_LOGO            = docs/img/pmlib-logo.svg
+OUTPUT_DIRECTORY        = docs
+
+INPUT                   = new/pmlib README.md
+FILE_PATTERNS           = *.hpp *.cpp
+RECURSIVE               = YES
+# Vendored third-party sources: not part of PMLib's own API surface.
+EXCLUDE                 = new/pmlib/utils/json new/pmlib/utils/jsoncpp.cpp
+USE_MDFILE_AS_MAINPAGE  = README.md
+
+GENERATE_HTML           = YES
+GENERATE_LATEX          = NO
+
+EXTRACT_ALL             = YES
+EXTRACT_STATIC          = YES
+EXTRACT_PRIVATE         = NO
+
+JAVADOC_AUTOBRIEF       = YES
+BUILTIN_STL_SUPPORT     = YES
+
+QUIET                   = YES
+WARN_IF_UNDOCUMENTED    = NO

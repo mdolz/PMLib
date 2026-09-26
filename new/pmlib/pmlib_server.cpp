@@ -30,6 +30,10 @@
 #include <getopt.h>
 #include "server.hpp"
 
+/// @file pmlib_server.cpp
+/// @brief Entry point: parses --configfile/--daemonize and runs a
+///        PMLib::Server for the lifetime of the process.
+
 void printUsage(const std::string & progName){
     std::cerr << std::endl;
     std::cerr << "Usage: " << progName << " [--verbose] [--configfile]" << std::endl;

@@ -27,11 +27,27 @@
 #ifndef COUNTER_HPP
 #define COUNTER_HPP
 
+/// @file counter.hpp
+/// @brief A client-owned, named measurement session over a subset of a
+///        Device's lines.
+
 namespace PMLib
 {
+    /// Maps a line id to a sample-buffer offset (Device::get_line_data()
+    /// index at the moment a set was opened/closed); used to delimit the
+    /// slice of buffered samples that belongs to one start/stop cycle.
     typedef map<int, long long int> set_t;
     class Server;
 
+    /// One client's measurement session against a single Device.
+    ///
+    /// A Counter is created for the lifetime of a client TCP connection
+    /// (see Server::connection()) and owns its own thread of control
+    /// (run()), driven by Operation opcodes read from the socket. Each
+    /// start()/stop() pair records a "set": the [begin, end) offsets into
+    /// the device's per-line sample buffers covering that interval, so a
+    /// client can start/stop/restart multiple times and later fetch (get())
+    /// the concatenation of all recorded sets in one call.
     class Counter {
 
         socket_ptr _sock;
@@ -49,6 +65,10 @@ namespace PMLib
         bool registered;
 
       public:
+        /// Reads the counter's creation request (device name, frequency,
+        /// aggregate flag, line bitmask) off @p sock, registers it with the
+        /// requested device, replies with the result, then blocks in run()
+        /// for the rest of the connection's lifetime.
         Counter(socket_ptr _sock, Server* server);
         ~Counter();
 
@@ -56,19 +76,39 @@ namespace PMLib
         string get_client_ip() const { return _sock->remote_endpoint().address().to_string(); }
         const vector<int>& get_lines() const { return lines; }
 
+        /// Begins a new set: activates the counter's lines on the device and
+        /// records the current buffer offsets as the set's start.
         void start();
+        /// Like start(), but appends a new set instead of erroring if one is
+        /// already open; used by clients that bracket several sub-regions
+        /// under the same counter.
         void restart();
+        /// Closes the current set: deactivates the lines and records the
+        /// current buffer offsets as the set's end.
         void stop();
+        /// Replies with the concatenated (optionally line-aggregated)
+        /// samples of every completed set, resampled to this counter's
+        /// requested frequency.
         void get();
+        /// Ends the counter's session, causing run() to return.
         void finalize();
+        /// Decodes the line bitmask received from the client into the list
+        /// of line ids this counter measures.
         void set_lines(string lines_str);
+        /// Validates the requested frequency against the device's maximum
+        /// and derives the device-sample stride (interval) needed to
+        /// downsample to it.
         void set_frequency(int frequency);
         //bool last_set_completed();
+        /// Debug helper: dumps the recorded sets to stdout.
         void show_sets();
 
+        /// Reads Operation opcodes from the socket in a loop and dispatches
+        /// to start()/restart()/stop()/get()/finalize() until finalize() (or
+        /// an error) ends the session.
         void run();
     };
-    
+
 }
 
 #endif
