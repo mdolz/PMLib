@@ -16,6 +16,8 @@ USE_MDFILE_AS_MAINPAGE  = README.md
 
 GENERATE_HTML           = YES
 GENERATE_LATEX          = NO
+# Keep output self-contained: don't depend on Graphviz being installed.
+HAVE_DOT                = NO
 
 EXTRACT_ALL             = YES
 EXTRACT_STATIC          = YES
