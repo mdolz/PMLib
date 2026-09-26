@@ -37,9 +37,9 @@ PMLib follows a **client/server** model over TCP:
   supporting several concurrent counters against the same device.
 
 ```
- ┌──────────────┐ JSON config ┌─────────────────────────┐
- │ pmlib_server │────────────▶│  devices (WattsUp, LMG, │
- │  (server/)   │             │ ArduPower, APCape, ...) │
+ ┌──────────────┐             ┌─────────────────────────┐
+ │ pmlib_server │ JSON config │  devices (WattsUp, LMG, │
+ │  (server/)   │────────────▶│ ArduPower, APCape, ...) │
  └───────┬──────┘             └─────────────────────────┘
          │ TCP
          ▼
