@@ -39,7 +39,7 @@ PMLib follows a **client/server** model over TCP:
 ```
  ┌──────────────┐ JSON config ┌─────────────────────────┐
  │ pmlib_server │────────────▶│  devices (WattsUp, LMG, │
- │    (src/)    │             │ ArduPower, APCape, ...) │
+ │  (server/)   │             │ ArduPower, APCape, ...) │
  └───────┬──────┘             └─────────────────────────┘
          │ TCP
          ▼
@@ -54,32 +54,32 @@ PMLib follows a **client/server** model over TCP:
 ```
 PMLib/
 ├── CMakeLists.txt
-├── src/                Server, counter, device and device-driver sources
+├── server/             Server, counter, device and device-driver sources
 │                       (the actively maintained C++17 implementation)
 ├── third_party/stxxl/  Vendored STXXL, used for on-disk sample storage
 ├── examples/           Example JSON server configurations
 ├── client/             C client API (pmlib.h) applications link against
 │                       to talk to pmlib_server — still actively used
-├── legacy/             Deprecated Python2 server daemon, predates src/
+├── legacy/             Deprecated Python2 server daemon, predates server/
 │   └── daemon/         (adds IPMI, National Instruments, PDU, DC/DC2
-│                       device backends not ported to src/)
+│                       device backends not ported to server/)
 └── docs/               Doxygen output and static assets (logo, ...)
 ```
 
 `client/` is the one client API PMLib has and is still how applications
-talk to `pmlib_server`, whether it's the modern C++ server in `src/` or
+talk to `pmlib_server`, whether it's the modern C++ server in `server/` or
 the legacy one in `legacy/`. `legacy/` itself is only the old Python
-server daemon: it predates the C++ rewrite in `src/` and is kept for
+server daemon: it predates the C++ rewrite in `server/` and is kept for
 reference, but is not actively developed.
 
 ## Supported devices
 
 | Device | Status | Implementation |
 |---|---|---|
-| WattsUp? Pro | Supported | `src/devices/WattsUp.hpp` |
-| ZES Zimmer LMG450 | Supported | `src/devices/LMG.hpp` |
-| ArduPower (Arduino-based PDU) | Supported | `src/devices/ArduPower.hpp` |
-| APCape / AccelPower CAPE | Experimental (`USE_DEVICE_APCAPE`) | `src/devices/APCape.hpp` |
+| WattsUp? Pro | Supported | `server/devices/WattsUp.hpp` |
+| ZES Zimmer LMG450 | Supported | `server/devices/LMG.hpp` |
+| ArduPower (Arduino-based PDU) | Supported | `server/devices/ArduPower.hpp` |
+| APCape / AccelPower CAPE | Experimental (`USE_DEVICE_APCAPE`) | `server/devices/APCape.hpp` |
 | IPMI, National Instruments, generic PDU, DC/DC2 | Legacy only | `legacy/daemon/devices/` |
 
 ## Building
@@ -147,7 +147,7 @@ pm_print_data_csv("region1.csv", counter, lines, /*set=*/0);
 
 ## Documentation
 
-API reference for the `src/` C++ sources is generated with
+API reference for the `server/` C++ sources is generated with
 [Doxygen](https://www.doxygen.nl/):
 
 ```bash
@@ -169,7 +169,7 @@ If you use PMLib in academic work, please cite:
 ## Contributing
 
 Issues and pull requests are welcome. When contributing to the hardware
-device drivers under `src/devices/` or `legacy/daemon/devices/`,
+device drivers under `server/devices/` or `legacy/daemon/devices/`,
 please note in the PR description which physical device you tested against,
 since these cannot be exercised in CI.
 

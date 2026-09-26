@@ -1,4 +1,4 @@
-# Minimal Doxygen configuration for PMLib's C++ server (src/).
+# Minimal Doxygen configuration for PMLib's C++ server (server/).
 # Run `doxygen Doxyfile` from the repository root; HTML output is written
 # to docs/html/index.html. Unset options fall back to Doxygen's defaults.
 
@@ -7,11 +7,11 @@ PROJECT_BRIEF           = "Power Measurement Library"
 PROJECT_LOGO            = docs/img/pmlib-logo.png
 OUTPUT_DIRECTORY        = docs
 
-INPUT                   = src README.md
+INPUT                   = server README.md
 FILE_PATTERNS           = *.hpp *.cpp
 RECURSIVE               = YES
 # Vendored third-party sources: not part of PMLib's own API surface.
-EXCLUDE                 = src/utils/json src/utils/jsoncpp.cpp
+EXCLUDE                 = server/utils/json server/utils/jsoncpp.cpp
 USE_MDFILE_AS_MAINPAGE  = README.md
 
 GENERATE_HTML           = YES
