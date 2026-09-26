@@ -27,7 +27,7 @@ endif()
 ## Plugins (experimental)
 option(USE_DEVICE_APCAPE "Build support for AccelPower CAPE" OFF)
 
-set(PMLIB ${PROJECT_SOURCE_DIR}/src)
+set(PMLIB ${PROJECT_SOURCE_DIR}/server)
 
 set(PMLIBHEADERS
     ${PMLIB}/server.hpp
