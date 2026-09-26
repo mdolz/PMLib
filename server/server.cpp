@@ -338,7 +338,7 @@ void Server::parse_configfile(string config_filename) {
 
                 dev->register_line( ln, 
                                     l["description"].asString(),
-				    l.get("metric", "default" ).asString(),
+                                    l.get("metric", "default" ).asString(),
                                     l["number"].asInt(),
                                     c,
                                     l["voltage"].asFloat(), 

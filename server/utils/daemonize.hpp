@@ -105,7 +105,11 @@ namespace PMLib {
             }
 
             setsid();
-            chdir("/");
+            // Failure here (e.g. "/" unreadable) isn't fatal to daemonizing;
+            // the process just keeps its current directory.
+            if (chdir("/") != 0) {
+                CLOG_WARN << "Daemonize: could not chdir to /" << endl;
+            }
             umask(0);
 
             if (pid_t pid = fork()) {

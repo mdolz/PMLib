@@ -84,7 +84,7 @@ void Device::deregister_counter(const Counter &c) {
 void Device::register_line(string name, string description, string metric, int number, Computer &c, float voltage,
     float offset, float slope) {
     // Map string metrics to enum.
-    std:map<std::string, Metric> avail_metrics 
+    std::map<std::string, Metric> avail_metrics
     {
       { "voltage" , Metric::voltage },
       { "shunt_voltage" , Metric::shunt_voltage },
@@ -94,13 +94,15 @@ void Device::register_line(string name, string description, string metric, int n
       { "default" , Metric::def }
     };
 
-    Metric _metric;
+    // Falls back to the default metric on an unrecognized config string
+    // instead of leaving it uninitialized.
+    Metric _metric = Metric::def;
 
     try
     {
       _metric = avail_metrics.at( metric );
     }
-    catch( out_of_range )
+    catch( const out_of_range& )
     {
       std::cout << "Unavailable metric" << std::endl;
     }
