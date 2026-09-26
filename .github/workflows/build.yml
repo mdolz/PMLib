@@ -1,0 +1,43 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: default
+            cmake_args: ""
+          - name: apcape
+            cmake_args: "-DUSE_DEVICE_APCAPE=ON"
+    name: build (${{ matrix.name }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libboost-dev \
+            libboost-system-dev \
+            libboost-filesystem-dev \
+            libboost-thread-dev \
+            libboost-coroutine-dev \
+            libboost-log-dev \
+            libboost-context-dev \
+            libboost-chrono-dev \
+            libboost-date-time-dev \
+            libboost-atomic-dev \
+            libboost-regex-dev \
+            libi2c-dev
+
+      - name: Configure
+        run: cmake -S new -B new/build ${{ matrix.cmake_args }}
+
+      - name: Build
+        run: cmake --build new/build -j"$(nproc)"
