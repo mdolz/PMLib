@@ -47,7 +47,8 @@ namespace PMLib
         /// request completes.
         Info(socket_ptr sock, Operation op, Server* server);
 
-        /// Replies with the name of every configured device.
+        /// Replies with the device count followed by each configured
+        /// device's name, per client/pm_get_devices.c's protocol.
         void list_devices();
         /// Reads a device name off the socket and replies with its max
         /// frequency, line count and name.

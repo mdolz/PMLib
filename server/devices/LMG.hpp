@@ -28,15 +28,28 @@
 #define LMG_HPP
 
 #include <boost/algorithm/string.hpp>
+#include <sstream>
+#include <iomanip>
+#include <cstring>
 
 using namespace boost::asio;
 
 /// @file LMG.hpp
 /// @brief Driver for the ZES Zimmer LMG450/LMG500 power analyzer, used as a
-///        multi-outlet (PDU-style) device. The SCPI-over-serial protocol
-///        implementation below is commented out pending hardware
-///        validation; the active sampling loop is a stub that fabricates
-///        increasing per-line values.
+///        multi-outlet (PDU-style) device.
+///
+///        Ported from legacy/daemon/devices/LMG450Device.py, which is the
+///        only one of the two device types (LMG450, n_lines=4) that Python
+///        actually implements and was presumably run against real
+///        hardware; LMG500 (n_lines=8) is a same-protocol extrapolation
+///        with no Python reference to check it against, so please validate
+///        it specifically before trusting its readings.
+///
+///        The Python driver's baud rate (57600, hardware flow control) and
+///        binary reply format (a fixed-size packed struct, not a text
+///        line) are load-bearing: an earlier draft of this file used
+///        115200 and a text-line read here, neither of which match the
+///        actual LMG wire protocol.
 
 namespace PMLib
 {
@@ -46,20 +59,16 @@ namespace PMLib
         LMG(string name, string url) :
             Device(name, url, max_freq, n_lines, pdu,
             [&] () {
-                /*
-                // Experimental code: real LMG SCPI protocol (untested on
-                // hardware, kept for reference/completion by whoever has a
-                // device to validate against).
                 io_service io;
                 serial_port port( io, url );
 
-                port.set_option( serial_port_base::baud_rate( 115200 ) );
+                port.set_option( serial_port_base::baud_rate( 57600 ) );
                 port.set_option( serial_port_base::character_size( 8 ) );
                 port.set_option( serial_port_base::flow_control( serial_port_base::flow_control::hardware ) );
                 port.set_option( serial_port_base::parity( serial_port_base::parity::none ) );
                 port.set_option( serial_port_base::stop_bits( serial_port_base::stop_bits::one ) );
 
-                function<void(string)> sendstr = [&](string s) 
+                function<void(string)> sendstr = [&](string s)
                     {  write(port, buffer(s.c_str(),  sizeof(char)*s.size()));  };
 
                 sendstr(":SYSTem:LANGuage SHORT\n");
@@ -67,22 +76,36 @@ namespace PMLib
                 std::stringstream ss;
                 ss << "CYCL " << std::fixed << std::setprecision(6) << (double)(1.0/max_freq) << "\n";
                 sendstr(ss.str());
-                sendstr("ACTN;P1?;P2?;P3?;P4?\n");
+
+                // Requests one power reading channel per line ("P1?;P2?;...").
+                std::stringstream actn;
+                actn << "ACTN";
+                for ( int s = 0; s < n_lines; s++ ) actn << ";P" << (s+1) << "?";
+                actn << "\n";
+                sendstr(actn.str());
+
                 sendstr("CONT ON\n");
 
-                boost::asio::streambuf buff;
-                istream is(&buff);
-                string line;
-                vector<string> vsample;
+                // Each reply is a fixed-size packed frame: a 7-byte header,
+                // then one little-endian 32-bit float per requested
+                // channel, then a 1-byte trailer - never text/line-based,
+                // so it's read as a raw byte count rather than delimited.
+                const size_t header_bytes = 7, trailer_bytes = 1;
+                const size_t frame_bytes = header_bytes + n_lines * sizeof(float) + trailer_bytes;
+                vector<char> frame(frame_bytes);
 
-                while ( is_running() ) { 
+                while ( is_running() ) {
 
-                    read_until(port, buff, "\n");
-                    getline(is, line);
+                    boost::asio::read(port, buffer(frame, frame_bytes));
 
                     for ( int s = 0; s < n_lines; s++ ) {
-                        // std::reverse(..., ...); // Needed if data comes little-endian
-                        sample[s] = *reinterpret_cast<double*>( line[7+s] );
+                        float v;
+                        // memcpy avoids the misaligned-pointer UB of
+                        // reinterpret_cast'ing straight into the buffer;
+                        // assumes a little-endian host, which the LMG's
+                        // own packed format is defined in terms of.
+                        std::memcpy( &v, frame.data() + header_bytes + s * sizeof(float), sizeof(float) );
+                        sample[s] = v;
                     }
 
                     yield(sample);
@@ -94,24 +117,13 @@ namespace PMLib
 
                 port.close();
                 io.stop();
-                */
-
-                // Stub sampling loop (no serial hardware read yet): see
-                // file-level comment above.
-                while ( is_running() ) {
-                    sample[0] += 0.01;
-                    sample[1] += 0.02;
-                    sample[2] += 0.01;
-                    sample[3] += 0.03;
-
-                    yield( sample );
-                    this_thread::sleep_for(std::chrono::microseconds((int)(1e6/max_freq)));
-                }
         } ) {};
     };
 
-    /// Registers the JSON config "type": "LMG450" (4 lines) and
-    /// "LMG500" (8 lines).
+    /// Registers the JSON config "type": "LMG450" (4 lines, validated
+    /// against the Python reference implementation's protocol) and
+    /// "LMG500" (8 lines, same protocol extrapolated to more channels -
+    /// unverified, see the file-level note above).
     static RegisterDevice< LMG< 4 > > Reg_LMG450("LMG450");
     static RegisterDevice< LMG< 8 > > Reg_LMG500("LMG500");
 }
